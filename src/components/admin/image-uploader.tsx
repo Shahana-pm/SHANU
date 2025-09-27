@@ -1,8 +1,5 @@
-
-
 'use client';
 
-import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -10,33 +7,7 @@ import { X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
-
-// This is a server action to read the public directory.
-// We can't use `fs` on the client, so we need this action.
-// NOTE: In a real Next.js app, this would be in an `actions.ts` file.
-// For Studio, we can define it here.
-async function getPublicImageUrls(): Promise<string[]> {
-    'use server';
-    const fs = require('fs/promises');
-    const path = require('path');
-    
-    try {
-        const imageDir = path.join(process.cwd(), 'public', 'product-images');
-        const files = await fs.readdir(imageDir);
-        // Filter for common image extensions
-        const imageFiles = files.filter((file: string) => /\.(png|jpe?g|gif|webp)$/i.test(file));
-        return imageFiles.map((file: string) => `/product-images/${file}`);
-    } catch (error: any) {
-        // If the directory doesn't exist, return an empty array.
-        if (error.code === 'ENOENT') {
-            console.warn("The directory 'public/product-images' does not exist. Please create it and add your images.");
-            return [];
-        }
-        console.error("Error reading image directory:", error);
-        return [];
-    }
-}
-
+import { getPublicImageUrls } from '@/lib/image-actions';
 
 interface ImagePickerProps {
   onImageSelect: (url: string) => void;
