@@ -20,7 +20,7 @@ export function AdminNav() {
   return (
     <nav className="p-4 space-y-2">
       <Link href="/admin" className="text-xl font-bold font-headline mb-4 block px-2">
-        Acme Inc
+        IQRAH SHANU
       </Link>
       {navItems.map((item) => (
         <Link
