@@ -3,11 +3,15 @@ import { notFound } from "next/navigation";
 import { useDoc, useFirestore } from "@/firebase";
 import { Product } from "@/lib/types";
 import { doc } from "firebase/firestore";
-import { useMemo } from "react";
+import { useMemo, use } from "react";
 import EditProductForm from "./edit-product-form";
 
-export default function AdminProductEditPage({ params: { id } }: { params: { id: string } }) {
+export default function AdminProductEditPage({ params }: { params: { id: string } }) {
   const firestore = useFirestore();
+  // The 'params' object is a Promise-like object in recent Next.js versions.
+  // We must use `use()` to unwrap its value in Client Components.
+  const resolvedParams = use(Promise.resolve(params));
+  const { id } = resolvedParams;
   
   const productRef = useMemo(() => {
     if (!firestore || !id) return null;
