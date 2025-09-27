@@ -44,7 +44,7 @@ export function ImageUploader({ onUploadSuccess, initialImageUrl }: ImageUploade
       try {
         const options = {
           maxSizeMB: 0.5,
-          maxWidthOrHeight: 1920,
+          maxWidthOrHeight: 1024,
           useWebWorker: true,
         };
         const compressedFile = await imageCompression(file, options);
