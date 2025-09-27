@@ -1,0 +1,67 @@
+/**
+ * @file Firestore Security Rules
+ * @version 2
+ *
+ * @Core Philosophy
+ * This ruleset enforces a user-ownership model for user profiles and allows public read access to product information.
+ *
+ * @Data Structure
+ * - `/users/{userId}`: Stores public user profile data, accessible only to the user themselves.
+ * - `/products/{productId}`: Stores product details, publicly readable.
+ *
+ * @Key Security Decisions
+ * - Users can only create, update, or delete their own profile.
+ * - Products are publicly readable, but all write access is denied (to be updated in a later phase).
+ * - Listing of user profiles is denied.
+ *
+ * @Denormalization for Authorization
+ *  N/A in this version.
+ *
+ * @Structural Segregation
+ * Public user profiles are stored directly under `/users/{userId}`, ensuring easy access with clear ownership.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Controls access to user profile documents.
+     * @path /users/{userId}
+     * @allow (create) - User with uid 'user_abc' can create their profile document.
+     * @allow (get, update, delete) - User with uid 'user_abc' can read, update, or delete their own profile.
+     * @deny (create) - User with uid 'user_xyz' cannot create a profile document for 'user_abc'.
+     * @deny (get, update, delete) - User with uid 'user_xyz' cannot read, update, or delete the profile of 'user_abc'.
+     * @deny (list) - No one can list all user profiles.
+     * @principle Enforces document ownership for user profiles.
+     */
+    match /users/{userId} {
+      // Helper function to check if the request is made by the owner.
+      function isOwner(userId) {
+        return request.auth != null && request.auth.uid == userId;
+      }
+
+      // Helper function to check if the request is made by an existing owner.
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      allow get: if isOwner(userId);
+      allow list: if false;
+
+      allow create: if isOwner(userId) && request.resource.data.uid == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.uid == resource.data.uid;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Controls access to product documents.
+     * @path /products/{productId}
+     * @allow (get, list) - Anyone can read the products.
+     * @deny (create, update, delete) - No one can create, update, or delete products.
+     */
+    match /products/{productId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+  }
+}
