@@ -15,7 +15,7 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link href={`/products/${product.id}`} className="group">
       <div className="overflow-hidden rounded-lg">
-        <div className="relative aspect-[3/4] w-full overflow-hidden bg-secondary">
+        <div className="relative aspect-[4/5] w-full overflow-hidden bg-secondary">
           {image && (
             <Image
               src={image.imageUrl}
