@@ -1,7 +1,32 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Package, ShoppingCart, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DollarSign, Package, ShoppingCart, Users, Database } from "lucide-react";
+import { seedDatabase } from "@/lib/seed";
+import { useToast } from "@/hooks/use-toast";
+
 
 export default function AdminDashboardPage() {
+  const { toast } = useToast();
+
+  const handleSeed = async () => {
+    try {
+      await seedDatabase();
+      toast({
+        title: "Database Seeded!",
+        description: "Your Firestore database has been populated with product data.",
+      });
+    } catch (error: any) {
+      console.error("Error seeding database:", error);
+      toast({
+        variant: "destructive",
+        title: "Seeding Failed",
+        description: error.message || "Could not seed the database. Check the console.",
+      });
+    }
+  }
+
   return (
     <div>
       <h1 className="font-headline text-3xl font-bold mb-8">Dashboard</h1>
@@ -48,8 +73,18 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
       <div className="mt-8">
-        <h2 className="font-headline text-2xl font-bold mb-4">Welcome to your dashboard!</h2>
-        <p className="text-muted-foreground">Here you can manage your products, view orders, and get insights into your store's performance. Use the AI Product Description tool to enhance your listings and attract more customers.</p>
+        <Card>
+            <CardHeader>
+                <CardTitle>Database Tools</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="mb-4 text-muted-foreground">Click the button below to populate your Firestore database with the initial set of products. You only need to do this once.</p>
+                <Button onClick={handleSeed}>
+                    <Database className="mr-2 h-4 w-4" />
+                    Seed Database
+                </Button>
+            </CardContent>
+        </Card>
       </div>
     </div>
   );

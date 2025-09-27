@@ -2,8 +2,8 @@
 // To run this script, you would typically use a command like `ts-node src/lib/seed.ts`
 // in a real project setup. For this environment, we will trigger it manually.
 
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, writeBatch } from 'firebase/firestore';
+import { initializeApp, getApps } from 'firebase/app';
+import { getFirestore, collection, writeBatch, doc } from 'firebase/firestore';
 import { firebaseConfig } from '../firebase/config';
 
 const originalProducts = [
@@ -88,7 +88,7 @@ const originalProducts = [
     },
     {
       id: 'orbit-clock',
-      name: 'Orbit Wall clooo',
+      name: 'Orbit Wall Clock',
       category: 'Decor',
       price: 80,
       description: 'Keep track of time in style with the Orbit Wall Clock. Its silent sweep movement and simple, elegant design make it a subtle yet striking addition to your wall.',
@@ -131,9 +131,10 @@ const originalProducts = [
     },
   ];
 
-async function seedDatabase() {
+export async function seedDatabase() {
     // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
+    const apps = getApps();
+    const app = apps.length > 0 ? apps[0] : initializeApp(firebaseConfig);
     const db = getFirestore(app);
     console.log("Firebase Initialized and Firestore instance created.");
 
@@ -142,7 +143,7 @@ async function seedDatabase() {
 
     originalProducts.forEach(product => {
         const { id, ...productData } = product;
-        const docRef = productsCollection.doc(id);
+        const docRef = doc(db, "products", id);
         batch.set(docRef, productData);
     });
 
@@ -151,12 +152,6 @@ async function seedDatabase() {
         console.log(`Successfully seeded ${originalProducts.length} products.`);
     } catch (error) {
         console.error("Error seeding database:", error);
+        throw new Error("Error seeding database");
     }
 }
-
-// We will call this function manually for the user.
-// seedDatabase();
-
-console.log("To seed the database, call seedDatabase(). You may need to do this manually from a browser console or similar environment if direct script execution is not available.");
-
-export { seedDatabase };
