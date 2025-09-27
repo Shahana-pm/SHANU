@@ -8,11 +8,12 @@ import EditProductForm from "./edit-product-form";
 
 export default function AdminProductEditPage({ params }: { params: { id: string } }) {
   const firestore = useFirestore();
+  const { id } = params;
   
   const productRef = useMemo(() => {
     if (!firestore) return null;
-    return doc(firestore, "products", params.id);
-  }, [firestore, params.id]);
+    return doc(firestore, "products", id);
+  }, [firestore, id]);
 
   const { data: product, loading } = useDoc<Product>(productRef);
 
