@@ -21,7 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Product, ProductVariant, ProductReview } from "@/lib/types";
 import { useFirestore } from "@/firebase";
-import { doc, writeBatch, collection, serverTimestamp } from "firebase/firestore";
+import { doc, writeBatch, collection } from "firebase/firestore";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { PlusCircle, Trash2 } from "lucide-react";
@@ -86,36 +86,41 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
       return;
     }
 
-    try {
-      const batch = writeBatch(firestore);
-      const productRef = doc(firestore, "products", product.id);
+    const batch = writeBatch(firestore);
+    const productRef = doc(firestore, "products", product.id);
 
-      const { variants, ...productData } = values;
-      batch.update(productRef, productData);
+    // Exclude variants from the main product data
+    const { variants: formVariants, ...productData } = values;
+
+    // Update the main product document
+    batch.update(productRef, productData);
+
+    // Set (add or update) each variant in the sub-collection
+    formVariants.forEach(variant => {
+      // If a variant has an ID, it already exists. If not, it's new.
+      const variantRef = variant.id
+        ? doc(firestore, "products", product.id, "variants", variant.id)
+        : doc(collection(firestore, "products", product.id, "variants"));
+
+      // Ensure we only write variant-specific data to the variant document
+      const variantData = {
+        color: variant.color,
+        colorHex: variant.colorHex,
+        imageIds: variant.imageIds,
+      };
       
-      values.variants.forEach(variant => {
-        const variantRef = variant.id
-          ? doc(firestore, "products", product.id, "variants", variant.id)
-          : doc(collection(firestore, "products", product.id, "variants"));
-        
-        batch.set(variantRef, {
-          color: variant.color,
-          colorHex: variant.colorHex,
-          imageIds: variant.imageIds
+      batch.set(variantRef, variantData);
+    });
+
+    try {
+        await batch.commit();
+        toast({
+            title: "Product Saved!",
+            description: `${values.name} has been updated.`,
         });
-      });
-
-      await batch.commit();
-
-      toast({
-        title: "Product Saved!",
-        description: `${values.name} has been updated.`,
-      });
-      router.push("/admin/products");
-      router.refresh();
-
+        router.push("/admin/products");
+        router.refresh();
     } catch (serverError) {
-      console.error("Error saving product: ", serverError);
       const permissionError = new FirestorePermissionError({
         path: `/products/${product.id}`,
         operation: 'update',
@@ -235,3 +240,5 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
     </Form>
   )
 }
+
+    
