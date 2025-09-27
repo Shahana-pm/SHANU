@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { useStorage } from '@/firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,7 @@ export function ImageUploader({ onUploadSuccess, initialImageUrl }: ImageUploade
   const [isUploading, setIsUploading] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
   const { toast } = useToast();
+  const uniqueId = useId();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -112,6 +113,7 @@ export function ImageUploader({ onUploadSuccess, initialImageUrl }: ImageUploade
   };
 
   const isProcessing = isCompressing || isUploading;
+  const fileInputId = `file-upload-${uniqueId}`;
 
   return (
     <div className="space-y-2">
@@ -130,7 +132,7 @@ export function ImageUploader({ onUploadSuccess, initialImageUrl }: ImageUploade
         </div>
       ) : (
         <div className="w-full">
-            <label htmlFor={`file-upload-${React.useId()}`} className={cn(
+            <label htmlFor={fileInputId} className={cn(
                 "flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted",
                 isProcessing && "cursor-default opacity-70"
             )}>
@@ -150,7 +152,7 @@ export function ImageUploader({ onUploadSuccess, initialImageUrl }: ImageUploade
                         </>
                     )}
                 </div>
-                <Input id={`file-upload-${React.useId()}`} type="file" className="hidden" onChange={handleFileChange} accept="image/png, image/jpeg, image/gif" disabled={isProcessing} />
+                <Input id={fileInputId} type="file" className="hidden" onChange={handleFileChange} accept="image/png, image/jpeg, image/gif" disabled={isProcessing} />
             </label>
 
             {isUploading && uploadProgress !== null && !isCompressing && (
