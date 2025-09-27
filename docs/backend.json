@@ -33,9 +33,9 @@
       "properties": {
         "color": { "type": "string", "description": "The color of the product variant." },
         "colorHex": { "type": "string", "description": "The hex code for the variant's color." },
-        "imageIds": { "type": "array", "items": { "type": "string" }, "description": "An array of image IDs from the placeholder images." }
+        "imageUrl": { "type": "string", "description": "URL or path to the product variant image." }
       },
-      "required": ["color", "colorHex", "imageIds"]
+      "required": ["color", "colorHex", "imageUrl"]
     },
     "ProductReview": {
       "title": "Product Review",
