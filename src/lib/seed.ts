@@ -1,10 +1,11 @@
 
+
 // This is a script to seed your Firestore database with initial product data.
 // To run this script, you would typically use a command like `ts-node src/lib/seed.ts`
 // in a real project setup. For this environment, we will trigger it manually.
 
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, collection, writeBatch, doc, getDocs, query, limit } from 'firebase/firestore';
+import { getFirestore, collection, writeBatch, doc, getDocs, query, deleteDoc } from 'firebase/firestore';
 import { firebaseConfig } from '../firebase/config';
 
 // The image URLs are now direct URLs to placeholder images.
@@ -134,6 +135,19 @@ const originalProducts = [
     },
   ];
 
+  async function deleteCollection(db: any, collectionPath: string) {
+    const q = query(collection(db, collectionPath));
+    const snapshot = await getDocs(q);
+
+    const batch = writeBatch(db);
+    snapshot.docs.forEach((doc) => {
+        batch.delete(doc.ref);
+    });
+
+    await batch.commit();
+}
+
+
 export async function seedDatabase() {
     // Initialize Firebase
     const apps = getApps();
@@ -141,15 +155,17 @@ export async function seedDatabase() {
     const db = getFirestore(app);
     console.log("Firebase Initialized and Firestore instance created.");
 
-    const productsCollection = collection(db, 'products');
-    
-    // Check if the database is already seeded
-    const snapshot = await getDocs(query(productsCollection, limit(1)));
-    if (!snapshot.empty) {
-      console.log("Database already contains products. Skipping seed operation.");
-      // We can throw an error to notify the user properly in the UI.
-      throw new Error("Database is not empty. Seeding was cancelled to prevent data loss.");
+    // Delete existing products before seeding
+    console.log("Deleting existing products...");
+    const productsSnapshot = await getDocs(collection(db, 'products'));
+    for (const productDoc of productsSnapshot.docs) {
+        // We need to delete subcollections first
+        await deleteCollection(db, `products/${productDoc.id}/variants`);
+        await deleteCollection(db, `products/${productDoc.id}/reviews`);
+        await deleteDoc(doc(db, 'products', productDoc.id));
     }
+    console.log("Existing products deleted.");
+
 
     const batch = writeBatch(db);
 
@@ -179,5 +195,3 @@ export async function seedDatabase() {
         throw new Error("Error seeding database");
     }
 }
-
-    

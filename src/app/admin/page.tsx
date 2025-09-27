@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +13,10 @@ export default function AdminDashboardPage() {
   const { toast } = useToast();
 
   const handleSeed = async () => {
+    if (!confirm("Are you sure you want to seed the database? This will overwrite existing product data.")) {
+        return;
+    }
+
     try {
       await seedDatabase();
       toast({
