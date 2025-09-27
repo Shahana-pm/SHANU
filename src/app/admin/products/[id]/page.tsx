@@ -1,20 +1,84 @@
+"use client"
+
 import { getProductById } from "@/lib/data";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+const formSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  category: z.string().min(1, "Category is required"),
+  price: z.coerce.number().min(0, "Price must be a positive number"),
+  description: z.string().min(1, "Description is required"),
+});
+
 
 export default function AdminProductEditPage({ params }: { params: { id: string } }) {
   const product = getProductById(params.id);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: product?.name || "",
+      category: product?.category || "",
+      price: product?.price || 0,
+      description: product?.description || "",
+    },
+  });
 
   if (!product) {
     notFound();
   }
 
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    // In a real app, you would save this to your database.
+    console.log("Updated product values:", values);
+    toast({
+      title: "Product Saved!",
+      description: `${values.name} has been updated.`,
+    });
+    router.push("/admin/products");
+  }
+
   return (
     <div>
       <h1 className="font-headline text-3xl font-bold mb-8">Edit: {product.name}</h1>
-      {/* Product edit form will go here */}
-      <div className="rounded-lg border border-dashed p-12 text-center">
-        <p className="text-muted-foreground">Product editing form coming soon!</p>
-      </div>
+      <Card>
+        <CardHeader>
+            <CardTitle>Product Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>Product Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="category" render={({ field }) => (<FormItem><FormLabel>Category</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="price" render={({ field }) => (<FormItem><FormLabel>Price</FormLabel><FormControl><Input type="number" step="0.01" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>Description</FormLabel><FormControl><Textarea rows={5} {...field} /></FormControl><FormMessage /></FormItem>)} />
+
+                    <div className="flex justify-end gap-2">
+                        <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
+                        <Button type="submit">Save Changes</Button>
+                    </div>
+                </form>
+            </Form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
