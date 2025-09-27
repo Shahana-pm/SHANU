@@ -8,10 +8,10 @@
 // 4. Copy the `firebaseConfig` object and paste it below, replacing the placeholder values.
 
 export const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDa3JmR3JkDONdBZWIJrPqEy-oBIxFev7E",
+  authDomain: "studio-8960281827-bdd3e.firebaseapp.com",
+  projectId: "studio-8960281827-bdd3e",
+  storageBucket: "studio-8960281827-bdd3e.appspot.com",
+  messagingSenderId: "115609832823",
+  appId: "1:115609832823:web:49c5a820af8900a5876572"
 };
