@@ -75,7 +75,7 @@ function EditProductForm({ product }: { product: Product }) {
   )
 }
 
-export default function AdminProductEditPage({ params }: { params: { id: string } }) {
+export default async function AdminProductEditPage({ params }: { params: { id: string } }) {
   const product = getProductById(params.id);
 
   if (!product) {
