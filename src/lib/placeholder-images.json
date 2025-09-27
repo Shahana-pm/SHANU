@@ -1,3 +1,76 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "img_chair_1",
+      "description": "A modern black chair",
+      "imageUrl": "https://images.unsplash.com/photo-1681394949029-fb3d12e96650?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxtb2Rlcm4lMjBjaGFpcnxlbnwwfHx8fDE3NTg5MTk2NTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern chair"
+    },
+    {
+      "id": "img_chair_2",
+      "description": "A modern white chair",
+      "imageUrl": "https://images.unsplash.com/photo-1569520792347-a4da4f048f55?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx3aGl0ZSUyMGNoYWlyfGVufDB8fHx8MTc1ODk4MzM1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "white chair"
+    },
+    {
+      "id": "img_chair_3",
+      "description": "A modern grey chair",
+      "imageUrl": "https://images.unsplash.com/photo-1629456515374-9a3fa05f5677?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Z3JleSUyMGNoYWlyfGVufDB8fHx8MTc1ODk4MzM1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "grey chair"
+    },
+    {
+      "id": "img_lamp_1",
+      "description": "A sleek black desk lamp",
+      "imageUrl": "https://images.unsplash.com/photo-1621447980929-6638614633c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkZXNrJTIwbGFtcHxlbnwwfHx8fDE3NTg4Nzc0MDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "desk lamp"
+    },
+    {
+      "id": "img_lamp_2",
+      "description": "A sleek silver desk lamp",
+      "imageUrl": "https://images.unsplash.com/photo-1621177555452-bedbe4c28879?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxkZXNrJTIwbGFtcHxlbnwwfHx8fDE3NTg4Nzc0MDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "desk lamp"
+    },
+    {
+      "id": "img_sofa_1",
+      "description": "A comfortable grey sofa",
+      "imageUrl": "https://images.unsplash.com/photo-1748309025784-d16e142b1cb1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxncmV5JTIwc29mYXxlbnwwfHx8fDE3NTg4ODA4MTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "grey sofa"
+    },
+    {
+      "id": "img_sofa_2",
+      "description": "A comfortable blue sofa",
+      "imageUrl": "https://images.unsplash.com/photo-1658500353909-633499247a62?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxibHVlJTIwc29mYXxlbnwwfHx8fDE3NTg5NjM4NTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "blue sofa"
+    },
+    {
+      "id": "img_table_1",
+      "description": "A wooden dining table",
+      "imageUrl": "https://images.unsplash.com/photo-1517870662726-c1d98ee36250?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxkaW5pbmclMjB0YWJsZXxlbnwwfHx8fDE3NTg5NTY2NDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dining table"
+    },
+    {
+      "id": "img_shelf_1",
+      "description": "A minimalist bookshelf",
+      "imageUrl": "https://images.unsplash.com/photo-1543248939-4296e1fea89b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxib29rc2hlbGZ8ZW58MHx8fHwxNzU4OTE0NzgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bookshelf"
+    },
+    {
+      "id": "img_clock_1",
+      "description": "A modern wall clock",
+      "imageUrl": "https://images.unsplash.com/photo-1564091880021-bb02f2b2928d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3YWxsJTIwY2xvY2t8ZW58MHx8fHwxNzU4OTA2OTQwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wall clock"
+    },
+    {
+      "id": "img_vase_1",
+      "description": "A ceramic vase",
+      "imageUrl": "https://images.unsplash.com/photo-1705526966290-2de7b8a33f03?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjZXJhbWljJTIwdmFzZXxlbnwwfHx8fDE3NTg5MjA2NzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ceramic vase"
+    },
+    {
+      "id": "img_plant_1",
+      "description": "An indoor potted plant",
+      "imageUrl": "https://images.unsplash.com/photo-1694680319722-02b0f4ebd5cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwb3R0ZWQlMjBwbGFudHxlbnwwfHx8fDE3NTg5Mzk0NzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "potted plant"
+    }
+  ]
 }
