@@ -20,56 +20,23 @@ import {
   } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import Image from "next/image";
-import { useCollection, useFirestore } from "@/firebase";
-import { Product, ProductVariant } from "@/lib/types";
-import { collection, deleteDoc, doc, query, limit, getDocs } from "firebase/firestore";
-import { useMemo, useState, useEffect } from "react";
+import { useFirestore } from "@/firebase";
+import { collection, deleteDoc, doc } from "firebase/firestore";
+import { useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddProductDialog } from "./add-product-dialog";
 import { Button } from "@/components/ui/button";
-
-type ProductWithFirstVariant = Product & { firstVariantImage?: ProductVariant['imageUrl'] };
+import { useProductsWithFirstVariant } from "@/hooks/use-products-with-first-variant";
 
 export default function AdminProductsPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
 
   const productsCollection = useMemo(() => firestore ? collection(firestore, "products") : null, [firestore]);
-  const { data: products, loading: productsLoading } = useCollection<Product>(productsCollection);
-
-  const [productsWithImages, setProductsWithImages] = useState<ProductWithFirstVariant[]>([]);
-  const [variantsLoading, setVariantsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchVariants = async () => {
-      setVariantsLoading(true);
-      if (products && firestore) {
-        const productsWithVariants = await Promise.all(
-          products.map(async (product) => {
-            const variantsRef = collection(firestore, 'products', product.id, 'variants');
-            const q = query(variantsRef, limit(1));
-            const variantsSnap = await getDocs(q);
-            if (!variantsSnap.empty) {
-              const firstVariant = variantsSnap.docs[0].data() as ProductVariant;
-              return { ...product, firstVariantImage: firstVariant.imageUrl };
-            }
-            return product;
-          })
-        );
-        setProductsWithImages(productsWithVariants);
-      } else if (products) {
-        setProductsWithImages(products);
-      }
-      setVariantsLoading(false);
-    };
-
-    fetchVariants();
-  }, [products, firestore]);
-
-  const isLoading = productsLoading || variantsLoading;
+  const { productsWithImages, loading: isLoading } = useProductsWithFirstVariant(productsCollection);
 
   const handleDelete = async (productId: string, productName: string) => {
     if (!firestore) return;
@@ -136,9 +103,9 @@ export default function AdminProductsPage() {
                 <TableRow key={product.id}>
                     <TableCell>
                         <div className="relative h-16 w-16 rounded-md overflow-hidden bg-secondary">
-                        {product.firstVariantImage ? (
+                        {product.firstVariantImageUrl ? (
                             <Image
-                            src={product.firstVariantImage}
+                            src={product.firstVariantImageUrl}
                             alt={product.name}
                             fill
                             className="object-cover"
