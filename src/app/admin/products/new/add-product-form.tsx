@@ -54,13 +54,13 @@ export function AddProductForm() {
     }
 
     const productsCollection = collection(firestore, "products");
-
+    
     const newProductData = {
       ...values,
       isNew: true,
       isTrending: false,
     };
-    
+
     addDoc(productsCollection, newProductData)
       .then((docRef) => {
         toast({
