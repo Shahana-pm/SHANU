@@ -15,12 +15,12 @@ interface AdminProductEditPageProps {
 
 export default function AdminProductEditPage({ params }: AdminProductEditPageProps) {
   const firestore = useFirestore();
-  const { id } = params;
 
   const productRef = useMemo(() => {
-    if (!firestore) return null;
+    const { id } = params;
+    if (!firestore || !id) return null;
     return doc(firestore, "products", id);
-  }, [firestore, id]);
+  }, [firestore, params]);
 
   const { data: product, loading } = useDoc<Product>(productRef);
 
