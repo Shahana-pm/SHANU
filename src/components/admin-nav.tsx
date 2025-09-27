@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
 import { Home, Package, ShoppingCart, Users, Bot, ArrowLeft } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -20,9 +19,9 @@ export function AdminNav() {
 
   return (
     <nav className="w-64 border-r bg-background flex flex-col">
-      <div className="h-16 border-b flex items-center px-6">
-        <Link href="/admin" className="flex items-center space-x-2">
-            <Image src="/eshopiq-logo.svg" alt="eShopIQ logo" width={120} height={40}/>
+      <div className="h-16 border-b flex items-center justify-center px-6">
+        <Link href="/admin" className="text-xl font-bold font-headline">
+          IQRAH SHANU
         </Link>
       </div>
       <div className="flex-1 p-4 space-y-2">

@@ -48,7 +48,7 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
       <div className="mt-8">
-        <h2 className="font-headline text-2xl font-bold mb-4">Welcome to your eShopIQ Dashboard!</h2>
+        <h2 className="font-headline text-2xl font-bold mb-4">Welcome to your IQRAH SHANU Dashboard!</h2>
         <p className="text-muted-foreground">Here you can manage your products, view orders, and get insights into your store's performance. Use the AI Product Description tool to enhance your listings and attract more customers.</p>
       </div>
     </div>

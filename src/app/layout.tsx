@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { CartProvider } from '@/hooks/use-cart';
 
 export const metadata: Metadata = {
-  title: 'eShopIQ - Smart & Stylish Shopping',
+  title: 'IQRAH SHANU - Smart & Stylish Shopping',
   description: 'A modern e-commerce experience powered by AI.',
 };
 

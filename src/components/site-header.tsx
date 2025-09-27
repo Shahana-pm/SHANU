@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link";
-import Image from "next/image";
 import { ShoppingBag, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -20,15 +19,26 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
-        <Link href="/" className="mr-6 flex items-center space-x-2">
-          <Image src="/eshopiq-logo.svg" alt="eShopIQ logo" width={120} height={40} />
-        </Link>
-        <nav className="flex items-center space-x-6 text-sm font-medium">
+      <div className="container grid h-16 grid-cols-3 items-center">
+        <nav className="flex items-center space-x-4 text-sm font-medium">
           <Link href="/products" className="transition-colors hover:text-foreground/80">
             Products
           </Link>
+          <Link href="/hair-accessories" className="transition-colors hover:text-foreground/80">
+            Hair Accessories
+          </Link>
+          <Link href="/dresses" className="transition-colors hover:text-foreground/80">
+            Dresses
+          </Link>
+          <Link href="/kids" className="transition-colors hover:text-foreground/80">
+            Kids
+          </Link>
         </nav>
+        <div className="flex justify-center">
+            <Link href="/" className="text-2xl font-bold font-headline">
+                IQRAH SHANU
+            </Link>
+        </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <Button variant="ghost" size="icon" asChild>
             <Link href="/cart">
