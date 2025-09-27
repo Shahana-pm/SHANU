@@ -1,6 +1,6 @@
 
 "use client"
-
+import * as React from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -21,7 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Product, ProductVariant, ProductReview } from "@/lib/types";
 import { useFirestore } from "@/firebase";
-import { doc, writeBatch, collection, deleteDoc } from "firebase/firestore";
+import { doc, writeBatch, collection } from "firebase/firestore";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { PlusCircle, Trash2 } from "lucide-react";
@@ -142,7 +142,7 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
       toast({
         variant: "destructive",
         title: "Save Failed",
-        description: serverError.message || "Could not save product. Check permissions or console for details.",
+        description: "Could not save product. Check permissions or console for details.",
       });
     }
   }
@@ -252,5 +252,3 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
     </Form>
   )
 }
-
-    
