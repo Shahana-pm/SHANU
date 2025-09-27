@@ -25,6 +25,38 @@
         }
       },
       "required": ["uid", "email"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Represents a product in the store.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the product."
+        },
+        "category": {
+          "type": "string",
+          "description": "The category of the product."
+        },
+        "price": {
+          "type": "number",
+          "description": "The price of the product."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the product."
+        },
+        "isTrending": {
+          "type": "boolean",
+          "description": "Whether the product is currently trending."
+        },
+        "isNew": {
+          "type": "boolean",
+          "description": "Whether the product is a new arrival."
+        }
+      },
+      "required": ["name", "category", "price", "description"]
     }
   },
   "auth": {
@@ -34,6 +66,10 @@
     "/users/{userId}": {
       "schema": { "$ref": "#/entities/UserProfile" },
       "description": "Stores public information about a user."
+    },
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Stores product information."
     }
   }
 }
