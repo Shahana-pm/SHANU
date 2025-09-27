@@ -1,4 +1,5 @@
 
+
 "use client"
 import * as React from "react";
 import { useRouter } from "next/navigation";
@@ -33,7 +34,7 @@ const variantSchema = z.object({
   id: z.string().optional(),
   color: z.string().min(1, "Color is required"),
   colorHex: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid hex code"),
-  imageUrl: z.string().nullable().optional(),
+  imageUrl: z.string().url("Please select a valid image.").min(1, "Image is required."),
 });
 
 const formSchema = z.object({
@@ -218,7 +219,7 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
                                       initialImageUrl={field.value}
                                     />
                                   </FormControl>
-                                  <FormDescription>Select an image you've uploaded to the 'product-images' folder in Firebase Storage.</FormDescription>
+                                  <FormDescription>Select an image from the 'public/product-images' folder.</FormDescription>
                                   <FormMessage />
                                 </FormItem>
                               )}

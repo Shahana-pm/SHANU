@@ -40,7 +40,7 @@ const variantSchema = z.object({
   id: z.string().optional(),
   color: z.string().min(1, "Color is required"),
   colorHex: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid hex code"),
-  imageUrl: z.string().nullable().optional(),
+  imageUrl: z.string().url("Please select a valid image.").min(1, "Image is required."),
 });
 
 const formSchema = z.object({
@@ -67,7 +67,7 @@ export function AddProductDialog() {
       description: "",
       isNew: true,
       isTrending: false,
-      variants: [{ color: "", colorHex: "#000000", imageUrl: null }],
+      variants: [{ color: "", colorHex: "#000000", imageUrl: "" }],
     },
   });
 
@@ -217,7 +217,7 @@ export function AddProductDialog() {
                                                         initialImageUrl={field.value}
                                                     />
                                                 </FormControl>
-                                                <FormDescription>Select an image from Firebase Storage.</FormDescription>
+                                                <FormDescription>Select an image from the 'public/product-images' folder.</FormDescription>
                                                 <FormMessage />
                                                 </FormItem>
                                             )}
@@ -228,7 +228,7 @@ export function AddProductDialog() {
                                         )}
                                     </div>
                                 ))}
-                                <Button type="button" variant="outline" onClick={() => append({ color: '', colorHex: '#000000', imageUrl: null })}>
+                                <Button type="button" variant="outline" onClick={() => append({ color: '', colorHex: '#000000', imageUrl: '' })}>
                                     <PlusCircle className="mr-2 h-4 w-4"/> Add Variant
                                 </Button>
                                 <FormMessage>{form.formState.errors.variants?.message}</FormMessage>
