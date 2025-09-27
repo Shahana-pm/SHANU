@@ -46,7 +46,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-secondary">
+      <section className="bg-background">
         <div className="container py-16 md:py-24">
             <div className="flex items-center justify-between mb-8">
                 <h2 className="font-headline text-3xl font-bold md:text-4xl">New Collection</h2>
