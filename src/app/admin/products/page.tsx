@@ -21,22 +21,46 @@ import {
 import Link from "next/link";
 import { useCollection, useFirestore } from "@/firebase";
 import { Product } from "@/lib/types";
-import { collection } from "firebase/firestore";
+import { collection, deleteDoc, doc } from "firebase/firestore";
 import { useMemo } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 
 export default function AdminProductsPage() {
   const firestore = useFirestore();
+  const { toast } = useToast();
 
   const productsCollection = useMemo(() => firestore ? collection(firestore, "products") : null, [firestore]);
   const { data: products } = useCollection<Product>(productsCollection);
+
+  const handleDelete = async (productId: string, productName: string) => {
+    if (!firestore) return;
+    if (!confirm(`Are you sure you want to delete "${productName}"?`)) return;
+
+    try {
+      await deleteDoc(doc(firestore, "products", productId));
+      toast({
+        title: "Product Deleted",
+        description: `"${productName}" has been removed.`,
+      });
+    } catch (error: any) {
+      console.error("Error deleting product:", error);
+      toast({
+        variant: "destructive",
+        title: "Deletion Failed",
+        description: error.message || "Could not delete the product.",
+      });
+    }
+  }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="font-headline text-3xl font-bold">Products</h1>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" /> Add Product
+        <Button asChild>
+          <Link href="/admin/products/new">
+            <PlusCircle className="mr-2 h-4 w-4" /> Add Product
+          </Link>
         </Button>
       </div>
       <div className="rounded-lg border">
@@ -75,7 +99,9 @@ export default function AdminProductsPage() {
                       <DropdownMenuItem asChild>
                         <Link href={`/admin/products/${product.id}`}>Edit</Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem>Delete</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDelete(product.id, product.name)}>
+                        Delete
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

@@ -1,28 +1,26 @@
-'use client';
+'use server'; // This is now a Server Component
 import { notFound } from "next/navigation";
-import { useDoc, useFirestore } from "@/firebase";
+import { getFirestore } from "firebase-admin/firestore";
 import { Product } from "@/lib/types";
-import { doc } from "firebase/firestore";
-import { useMemo, use } from "react";
 import EditProductForm from "./edit-product-form";
+import { adminApp } from "@/firebase/admin";
 
-export default function AdminProductEditPage({ params }: { params: { id: string } }) {
-  const firestore = useFirestore();
-  // The 'params' object is a Promise-like object in recent Next.js versions.
-  // We must use `use()` to unwrap its value in Client Components.
-  const resolvedParams = use(Promise.resolve(params));
-  const { id } = resolvedParams;
-  
-  const productRef = useMemo(() => {
-    if (!firestore || !id) return null;
-    return doc(firestore, "products", id);
-  }, [firestore, id]);
+// Helper function to get data from Firestore on the server
+async function getProduct(id: string): Promise<Product | null> {
+  const db = getFirestore(adminApp);
+  const productDoc = await db.collection("products").doc(id).get();
 
-  const { data: product, loading } = useDoc<Product>(productRef);
-
-  if (loading) {
-    return <div>Loading...</div>;
+  if (!productDoc.exists) {
+    return null;
   }
+  
+  // We manually add the id to the data object
+  return { id: productDoc.id, ...productDoc.data() } as Product;
+}
+
+export default async function AdminProductEditPage({ params }: { params: { id: string } }) {
+  const { id } = params;
+  const product = await getProduct(id);
 
   if (!product) {
     return notFound();
