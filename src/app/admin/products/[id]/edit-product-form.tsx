@@ -73,7 +73,6 @@ export default function EditProductForm({ product }: { product: Product }) {
           requestResourceData: values,
         });
         errorEmitter.emit('permission-error', permissionError);
-        console.error("Error updating product:", serverError); // Keep for debugging
       });
   }
 

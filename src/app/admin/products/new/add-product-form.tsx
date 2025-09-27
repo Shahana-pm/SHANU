@@ -78,7 +78,6 @@ export function AddProductForm() {
           requestResourceData: newProductData,
         });
         errorEmitter.emit('permission-error', permissionError);
-        console.error("Error adding product:", serverError);
       });
   }
 

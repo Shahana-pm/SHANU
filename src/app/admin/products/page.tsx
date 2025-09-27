@@ -54,7 +54,6 @@ export default function AdminProductsPage() {
           operation: 'delete',
         });
         errorEmitter.emit('permission-error', permissionError);
-        console.error("Error deleting product:", serverError);
       });
   }
 
