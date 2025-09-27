@@ -28,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type ProductWithFirstVariant = Product & { firstVariantImageId?: string };
 
@@ -36,14 +37,14 @@ export default function AdminProductsPage() {
   const { toast } = useToast();
 
   const productsCollection = useMemo(() => firestore ? collection(firestore, "products") : null, [firestore]);
-  const { data: products } = useCollection<Product>(productsCollection);
+  const { data: products, loading: productsLoading } = useCollection<Product>(productsCollection);
 
   const [productsWithImages, setProductsWithImages] = useState<ProductWithFirstVariant[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [variantsLoading, setVariantsLoading] = useState(true);
 
   useEffect(() => {
     const fetchVariants = async () => {
-      setLoading(true);
+      setVariantsLoading(true);
       if (products && firestore) {
         const productsWithVariants = await Promise.all(
           products.map(async (product) => {
@@ -61,11 +62,13 @@ export default function AdminProductsPage() {
       } else if (products) {
         setProductsWithImages(products);
       }
-      setLoading(false);
+      setVariantsLoading(false);
     };
 
     fetchVariants();
   }, [products, firestore]);
+
+  const isLoading = productsLoading || variantsLoading;
 
   const handleDelete = async (productId: string, productName: string) => {
     if (!firestore) return;
@@ -117,15 +120,17 @@ export default function AdminProductsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                     <TableRow key={i}>
-                        <TableCell><div className="h-16 w-16 bg-muted rounded animate-pulse"></div></TableCell>
-                        <TableCell><div className="h-4 w-48 bg-muted rounded animate-pulse"></div></TableCell>
-                        <TableCell><div className="h-4 w-24 bg-muted rounded animate-pulse"></div></TableCell>
-                        <TableCell><div className="h-4 w-16 bg-muted rounded animate-pulse"></div></TableCell>
-                        <TableCell><div className="h-4 w-20 bg-muted rounded animate-pulse"></div></TableCell>
-                        <TableCell></TableCell>
+                        <TableCell><Skeleton className="h-16 w-16 rounded-md" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                        <TableCell className="text-right">
+                          <Skeleton className="h-8 w-8 ml-auto" />
+                        </TableCell>
                     </TableRow>
                 ))
             ) : (
@@ -142,6 +147,7 @@ export default function AdminProductsPage() {
                             fill
                             className="object-cover"
                             data-ai-hint={image.imageHint}
+                            sizes="64px"
                             />
                         ) : (
                             <div className="flex items-center justify-center h-full w-full">
