@@ -16,10 +16,10 @@ export default function HomePage() {
   const productsRef = useMemo(() => firestore ? collection(firestore, 'products') : null, [firestore]);
   
   const trendingQuery = useMemo(() => productsRef ? query(productsRef, where('isTrending', '==', true), limit(4)) : null, [productsRef]);
-  const { productsWithImages: trendingProductsWithImages } = useProductsWithImages(trendingQuery);
+  const { productsWithImages: trendingProductsWithImages, loading: trendingLoading } = useProductsWithImages(trendingQuery);
   
   const newQuery = useMemo(() => productsRef ? query(productsRef, where('isNew', '==', true), limit(4)) : null, [productsRef]);
-  const { productsWithImages: newCollectionWithImages } = useProductsWithImages(newQuery);
+  const { productsWithImages: newCollectionWithImages, loading: newLoading } = useProductsWithImages(newQuery);
 
   return (
     <>
@@ -52,9 +52,20 @@ export default function HomePage() {
             </Button>
         </div>
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {trendingProductsWithImages?.map(product => (
-            <ProductCard key={product.id} product={product} variantImageUrl={product.firstVariantImageUrl} />
-          ))}
+          {trendingLoading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="aspect-[4/5] w-full bg-muted animate-pulse rounded-lg"/>
+                  <div className="h-4 w-1/4 bg-muted animate-pulse rounded"/>
+                  <div className="h-6 w-3/4 bg-muted animate-pulse rounded"/>
+                  <div className="h-6 w-1/3 bg-muted animate-pulse rounded"/>
+                </div>
+              ))
+          ) : (
+            trendingProductsWithImages?.map(product => (
+              <ProductCard key={product.id} product={product} variantImageUrl={product.firstVariantImageUrl} />
+            ))
+          )}
         </div>
       </section>
 
@@ -67,9 +78,20 @@ export default function HomePage() {
                 </Button>
             </div>
             <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {newCollectionWithImages?.map(product => (
-                <ProductCard key={product.id} product={product} variantImageUrl={product.firstVariantImageUrl} />
-            ))}
+            {newLoading ? (
+               Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="aspect-[4/5] w-full bg-muted animate-pulse rounded-lg"/>
+                  <div className="h-4 w-1/4 bg-muted animate-pulse rounded"/>
+                  <div className="h-6 w-3/4 bg-muted animate-pulse rounded"/>
+                  <div className="h-6 w-1/3 bg-muted animate-pulse rounded"/>
+                </div>
+              ))
+            ) : (
+                newCollectionWithImages?.map(product => (
+                    <ProductCard key={product.id} product={product} variantImageUrl={product.firstVariantImageUrl} />
+                ))
+            )}
             </div>
         </div>
       </section>
