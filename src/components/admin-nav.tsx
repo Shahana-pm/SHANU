@@ -18,7 +18,7 @@ export function AdminNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="w-64 border-r bg-background flex flex-col">
+    <nav className="w-full h-full flex flex-col">
       <div className="h-16 border-b flex items-center justify-center px-6">
         <Link href="/admin" className="text-xl font-bold font-headline">
           IQRAH SHANU

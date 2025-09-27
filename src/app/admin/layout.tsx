@@ -1,4 +1,5 @@
 import { AdminNav } from "@/components/admin-nav";
+import { SidebarProvider, Sidebar, SidebarInset } from "@/components/ui/sidebar";
 
 export default function AdminLayout({
   children,
@@ -6,11 +7,17 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen">
-      <AdminNav />
-      <main className="flex-1 p-8 bg-muted/40">
-        {children}
-      </main>
-    </div>
+    <SidebarProvider>
+      <div className="flex min-h-screen">
+        <Sidebar>
+            <AdminNav />
+        </Sidebar>
+        <SidebarInset>
+            <main className="flex-1 p-8 bg-muted/40">
+                {children}
+            </main>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 }

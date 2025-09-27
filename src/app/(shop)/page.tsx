@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
 import { products } from "@/lib/data";
 import { ArrowRight } from "lucide-react";
+import { Sidebar, SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
 export default function HomePage() {
   const trendingProducts = products.filter(p => p.isTrending).slice(0, 4);
