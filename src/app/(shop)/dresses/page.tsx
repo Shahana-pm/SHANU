@@ -1,50 +1,19 @@
 'use client';
 import { ProductCard } from "@/components/product-card";
-import { useCollection, useFirestore } from "@/firebase";
-import { Product, ProductVariant } from "@/lib/types";
-import { collection, query, where, getDocs, limit } from "firebase/firestore";
-import { useMemo, useState, useEffect } from "react";
-
-type ProductWithFirstVariant = Product & { firstVariantImageUrl?: ProductVariant['imageUrl'] };
+import { useProductsWithImages } from "@/hooks/use-products-with-images";
+import { useFirestore } from "@/firebase";
+import { collection, query, where } from "firebase/firestore";
+import { useMemo } from "react";
 
 export default function DressesPage() {
   const firestore = useFirestore();
-  const [productsWithImages, setProductsWithImages] = useState<ProductWithFirstVariant[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const productsQuery = useMemo(() => {
     if (!firestore) return null;
     return query(collection(firestore, "products"), where("category", "==", "Dresses"));
   }, [firestore]);
 
-  const { data: products } = useCollection<Product>(productsQuery);
-
-  useEffect(() => {
-    const fetchVariants = async () => {
-      setLoading(true);
-      if (products && firestore) {
-        const productsWithVariants = await Promise.all(
-          products.map(async (product) => {
-            const variantsRef = collection(firestore, 'products', product.id, 'variants');
-            const q = query(variantsRef, limit(1));
-            const variantsSnap = await getDocs(q);
-            if (!variantsSnap.empty) {
-              const firstVariant = variantsSnap.docs[0].data() as ProductVariant;
-              return { ...product, firstVariantImageUrl: firstVariant.imageUrl };
-            }
-            return product;
-          })
-        );
-        setProductsWithImages(productsWithVariants);
-      } else if (products) {
-        setProductsWithImages(products);
-      }
-      setLoading(false);
-    };
-
-    fetchVariants();
-  }, [products, firestore]);
-
+  const { productsWithImages, loading } = useProductsWithImages(productsQuery);
 
   return (
     <div className="container py-12">

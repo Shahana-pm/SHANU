@@ -4,43 +4,10 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
 import { ArrowRight } from "lucide-react";
-import { useCollection, useFirestore } from "@/firebase";
-import { Product, ProductVariant } from "@/lib/types";
-import { collection, query, where, getDocs, limit } from "firebase/firestore";
-import { useMemo, useState, useEffect } from "react";
-
-type ProductWithFirstVariant = Product & { firstVariantImageUrl?: ProductVariant['imageUrl'] };
-
-function useProductVariantImages(products: Product[] | null) {
-  const firestore = useFirestore();
-  const [productsWithImages, setProductsWithImages] = useState<ProductWithFirstVariant[]>([]);
-
-  useEffect(() => {
-    const fetchVariants = async () => {
-      if (products && firestore) {
-        const productsWithVariants = await Promise.all(
-          products.map(async (product) => {
-            const variantsRef = collection(firestore, 'products', product.id, 'variants');
-            const q = query(variantsRef, limit(1));
-            const variantsSnap = await getDocs(q);
-            if (!variantsSnap.empty) {
-              const firstVariant = variantsSnap.docs[0].data() as ProductVariant;
-              return { ...product, firstVariantImageUrl: firstVariant.imageUrl };
-            }
-            return product;
-          })
-        );
-        setProductsWithImages(productsWithVariants);
-      } else if(products) {
-        setProductsWithImages(products);
-      }
-    };
-
-    fetchVariants();
-  }, [products, firestore]);
-
-  return productsWithImages;
-}
+import { useFirestore } from "@/firebase";
+import { collection, query, where, limit } from "firebase/firestore";
+import { useMemo } from "react";
+import { useProductsWithImages } from "@/hooks/use-products-with-images";
 
 
 export default function HomePage() {
@@ -49,14 +16,10 @@ export default function HomePage() {
   const productsRef = useMemo(() => firestore ? collection(firestore, 'products') : null, [firestore]);
   
   const trendingQuery = useMemo(() => productsRef ? query(productsRef, where('isTrending', '==', true), limit(4)) : null, [productsRef]);
-  const { data: trendingProducts } = useCollection<Product>(trendingQuery);
+  const { productsWithImages: trendingProductsWithImages } = useProductsWithImages(trendingQuery);
   
   const newQuery = useMemo(() => productsRef ? query(productsRef, where('isNew', '==', true), limit(4)) : null, [productsRef]);
-  const { data: newCollectionProducts } = useCollection<Product>(newQuery);
-
-  const trendingProductsWithImages = useProductVariantImages(trendingProducts);
-  const newCollectionWithImages = useProductVariantImages(newCollectionProducts);
-
+  const { productsWithImages: newCollectionWithImages } = useProductsWithImages(newQuery);
 
   return (
     <>
