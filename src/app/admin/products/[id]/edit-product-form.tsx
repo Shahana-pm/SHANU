@@ -21,7 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Product, ProductVariant, ProductReview } from "@/lib/types";
 import { useFirestore } from "@/firebase";
-import { doc, writeBatch, collection } from "firebase/firestore";
+import { doc, writeBatch, collection, deleteDoc } from "firebase/firestore";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { PlusCircle, Trash2 } from "lucide-react";
@@ -75,6 +75,17 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
     control: form.control,
     name: "variants",
   });
+  
+  // Keep track of variants that are removed to delete them from Firestore
+  const [removedVariants, setRemovedVariants] = React.useState<string[]>([]);
+
+  const handleRemoveVariant = (index: number) => {
+    const variantId = fields[index].id;
+    if (variantId) {
+      setRemovedVariants(prev => [...prev, variantId]);
+    }
+    remove(index);
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!firestore || !product?.id) {
@@ -89,27 +100,28 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
     const batch = writeBatch(firestore);
     const productRef = doc(firestore, "products", product.id);
 
-    // Exclude variants from the main product data
     const { variants: formVariants, ...productData } = values;
 
-    // Update the main product document
     batch.update(productRef, productData);
 
-    // Set (add or update) each variant in the sub-collection
     formVariants.forEach(variant => {
-      // If a variant has an ID, it already exists. If not, it's new.
       const variantRef = variant.id
         ? doc(firestore, "products", product.id, "variants", variant.id)
         : doc(collection(firestore, "products", product.id, "variants"));
 
-      // Ensure we only write variant-specific data to the variant document
       const variantData = {
         color: variant.color,
         colorHex: variant.colorHex,
         imageIds: variant.imageIds,
       };
       
-      batch.set(variantRef, variantData);
+      batch.set(variantRef, variantData, { merge: true });
+    });
+
+    // Delete variants that were removed
+    removedVariants.forEach(variantId => {
+        const variantRef = doc(firestore, "products", product.id, "variants", variantId);
+        batch.delete(variantRef);
     });
 
     try {
@@ -120,7 +132,7 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
         });
         router.push("/admin/products");
         router.refresh();
-    } catch (serverError) {
+    } catch (serverError: any) {
       const permissionError = new FirestorePermissionError({
         path: `/products/${product.id}`,
         operation: 'update',
@@ -130,7 +142,7 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
       toast({
         variant: "destructive",
         title: "Save Failed",
-        description: "Could not save product. Check permissions or console for details.",
+        description: serverError.message || "Could not save product. Check permissions or console for details.",
       });
     }
   }
@@ -223,7 +235,7 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
                               )}
                             />
 
-                            <Button type="button" variant="destructive" size="icon" className="absolute top-4 right-4" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
+                            <Button type="button" variant="destructive" size="icon" className="absolute top-4 right-4" onClick={() => handleRemoveVariant(index)}><Trash2 className="h-4 w-4" /></Button>
                         </div>
                     ))}
                      <Button type="button" variant="outline" onClick={() => append({ color: '', colorHex: '#000000', imageIds: [''] })}>
