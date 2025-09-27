@@ -3,14 +3,14 @@
 import { ProductCard } from "@/components/product-card";
 import { useFirestore } from "@/firebase";
 import { collection } from "firebase/firestore";
-import { useMemo } from "react";
 import { useProductsWithFirstVariant } from "@/hooks/use-products-with-first-variant";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useMemoFirebase } from "@/hooks/use-memo-firebase";
 
 export default function ProductsPage() {
   const firestore = useFirestore();
   
-  const productsCollection = useMemo(() => firestore ? collection(firestore, "products") : null, [firestore]);
+  const productsCollection = useMemoFirebase(() => firestore ? collection(firestore, "products") : null, [firestore]);
 
   const { productsWithImages, loading } = useProductsWithFirstVariant(productsCollection);
 

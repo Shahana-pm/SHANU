@@ -3,14 +3,14 @@
 import { ProductCard } from "@/components/product-card";
 import { useFirestore } from "@/firebase";
 import { collection, query, where } from "firebase/firestore";
-import { useMemo } from "react";
 import { useProductsWithFirstVariant } from "@/hooks/use-products-with-first-variant";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useMemoFirebase } from "@/hooks/use-memo-firebase";
 
 export default function HairAccessoriesPage() {
   const firestore = useFirestore();
   
-  const productsQuery = useMemo(() => {
+  const productsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, "products"), where("category", "==", "Lighting"));
   }, [firestore]);

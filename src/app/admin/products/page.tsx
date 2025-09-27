@@ -22,7 +22,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useFirestore } from "@/firebase";
 import { collection, deleteDoc, doc } from "firebase/firestore";
-import { useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
@@ -30,12 +29,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AddProductDialog } from "./add-product-dialog";
 import { Button } from "@/components/ui/button";
 import { useProductsWithFirstVariant } from "@/hooks/use-products-with-first-variant";
+import { useMemoFirebase } from "@/hooks/use-memo-firebase";
 
 export default function AdminProductsPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
 
-  const productsCollection = useMemo(() => firestore ? collection(firestore, "products") : null, [firestore]);
+  const productsCollection = useMemoFirebase(() => firestore ? collection(firestore, "products") : null, [firestore]);
   const { productsWithImages, loading: isLoading } = useProductsWithFirstVariant(productsCollection);
 
   const handleDelete = async (productId: string, productName: string) => {

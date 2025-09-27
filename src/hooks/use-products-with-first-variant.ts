@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useCollection, useFirestore } from "@/firebase";
-import { collection, query, limit, getDocs, Query, DocumentData } from "firebase/firestore";
+import { collection, query, limit, getDocs, Query } from "firebase/firestore";
 import { Product, ProductVariant } from "@/lib/types";
 
 export type ProductWithFirstVariant = Product & { firstVariantImageUrl?: ProductVariant['imageUrl'] };
@@ -16,38 +16,19 @@ export function useProductsWithFirstVariant(productsQuery: Query | null) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // This effect runs when the products list from useCollection changes.
-    
     if (productsLoading) {
       setLoading(true);
       return;
     }
 
-    if (productsError) {
-      console.error("Error fetching products:", productsError);
-      setLoading(false);
-      return;
-    }
-
-    if (!products) {
-      setProductsWithImages([]);
-      setLoading(false);
-      return;
-    }
-    
-    if (products.length === 0) {
+    if (!firestore || !products) {
       setProductsWithImages([]);
       setLoading(false);
       return;
     }
 
-    let isCancelled = false;
-
-    const fetchFirstVariantImages = async () => {
-      if (!firestore) return;
-
+    const fetchVariants = async () => {
       setLoading(true);
-      
       try {
         const productsWithVariants = await Promise.all(
           products.map(async (product) => {
@@ -62,31 +43,19 @@ export function useProductsWithFirstVariant(productsQuery: Query | null) {
             return { ...product, firstVariantImageUrl: undefined }; 
           })
         );
-        
-        if (!isCancelled) {
-          setProductsWithImages(productsWithVariants);
-        }
+        setProductsWithImages(productsWithVariants);
       } catch (error) {
         console.error("Error fetching product variants:", error);
-        if (!isCancelled) {
-          // In case of error fetching variants, still show products without images.
-          setProductsWithImages(products);
-        }
+        // Fallback to products without images on error
+        setProductsWithImages(products);
       } finally {
-        if (!isCancelled) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     };
 
-    fetchFirstVariantImages();
+    fetchVariants();
 
-    return () => {
-      isCancelled = true;
-    };
-    // We depend on `products` object itself. If its content changes, we must refetch variants.
-    // JSON.stringify is a way to deep-compare the array of objects.
-  }, [JSON.stringify(products), firestore, productsLoading, productsError]);
+  }, [products, productsLoading, firestore]);
 
-  return { productsWithImages, loading, error: productsError };
+  return { productsWithImages, loading: productsLoading || loading, error: productsError };
 }

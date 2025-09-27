@@ -7,9 +7,9 @@ import { ProductCard } from "@/components/product-card";
 import { ArrowRight } from "lucide-react";
 import { useFirestore } from "@/firebase";
 import { collection, query, where, limit } from "firebase/firestore";
-import { useMemo } from "react";
 import { useProductsWithFirstVariant } from "@/hooks/use-products-with-first-variant";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useMemoFirebase } from "@/hooks/use-memo-firebase";
 
 function ProductGridSkeleton() {
   return (
@@ -29,12 +29,12 @@ function ProductGridSkeleton() {
 export default function HomePage() {
   const firestore = useFirestore();
 
-  const productsRef = useMemo(() => firestore ? collection(firestore, 'products') : null, [firestore]);
+  const productsRef = useMemoFirebase(() => firestore ? collection(firestore, 'products') : null, [firestore]);
   
-  const trendingQuery = useMemo(() => productsRef ? query(productsRef, where('isTrending', '==', true), limit(4)) : null, [productsRef]);
+  const trendingQuery = useMemoFirebase(() => productsRef ? query(productsRef, where('isTrending', '==', true), limit(4)) : null, [productsRef]);
   const { productsWithImages: trendingProducts, loading: trendingLoading } = useProductsWithFirstVariant(trendingQuery);
   
-  const newQuery = useMemo(() => productsRef ? query(productsRef, where('isNew', '==', true), limit(4)) : null, [productsRef]);
+  const newQuery = useMemoFirebase(() => productsRef ? query(productsRef, where('isNew', '==', true), limit(4)) : null, [productsRef]);
   const { productsWithImages: newCollection, loading: newLoading } = useProductsWithFirstVariant(newQuery);
 
   return (
