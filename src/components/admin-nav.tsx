@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Home, Package, ShoppingCart, Users, Bot } from "lucide-react";
+import { Home, Package, ShoppingCart, Users, Bot, ArrowLeft } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -41,6 +41,12 @@ export function AdminNav() {
             {item.label}
           </Link>
         ))}
+      </div>
+      <div className="p-4 border-t">
+        <Link href="/" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-muted">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Shop
+        </Link>
       </div>
     </nav>
   );
