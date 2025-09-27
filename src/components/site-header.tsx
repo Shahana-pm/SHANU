@@ -64,9 +64,9 @@ export function SiteHeader() {
             </Link>
           </Button>
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/admin">
+            <Link href="/login">
               <User className="h-5 w-5" />
-              <span className="sr-only">User Account</span>
+              <span className="sr-only">Login</span>
             </Link>
           </Button>
         </div>
