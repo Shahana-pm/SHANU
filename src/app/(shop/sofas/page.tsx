@@ -7,7 +7,7 @@ import { useProductsWithFirstVariant } from "@/hooks/use-products-with-first-var
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMemoFirebase } from "@/hooks/use-memo-firebase";
 
-export default function KidsPage() {
+export default function SofasPage() {
   const firestore = useFirestore();
 
   const productsQuery = useMemoFirebase(() => {
@@ -20,9 +20,9 @@ export default function KidsPage() {
   return (
     <div className="container py-12">
       <div className="mb-10 text-center">
-        <h1 className="font-headline text-4xl font-bold tracking-tight">Kids Collection</h1>
+        <h1 className="font-headline text-4xl font-bold tracking-tight">Sofas Collection</h1>
         <p className="mt-2 max-w-2xl mx-auto text-lg text-muted-foreground">
-          Adorable and comfortable styles for your little ones.
+          Adorable and comfortable styles for your home.
         </p>
       </div>
 
