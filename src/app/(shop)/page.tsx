@@ -5,9 +5,43 @@ import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
 import { ArrowRight } from "lucide-react";
 import { useCollection, useFirestore } from "@/firebase";
-import { Product } from "@/lib/types";
-import { collection, query, where } from "firebase/firestore";
-import { useMemo } from "react";
+import { Product, ProductVariant } from "@/lib/types";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { useMemo, useState, useEffect } from "react";
+
+type ProductWithFirstVariant = Product & { firstVariantImageId?: string };
+
+// Helper hook to fetch first variant image for a list of products
+function useProductVariantImages(products: Product[] | null) {
+  const firestore = useFirestore();
+  const [productsWithImages, setProductsWithImages] = useState<ProductWithFirstVariant[]>([]);
+
+  useEffect(() => {
+    const fetchVariants = async () => {
+      if (products && firestore) {
+        const productsWithVariants = await Promise.all(
+          products.map(async (product) => {
+            const variantsRef = collection(firestore, 'products', product.id, 'variants');
+            const variantsSnap = await getDocs(variantsRef);
+            if (!variantsSnap.empty) {
+              const firstVariant = variantsSnap.docs[0].data() as ProductVariant;
+              return { ...product, firstVariantImageId: firstVariant.imageIds[0] };
+            }
+            return product;
+          })
+        );
+        setProductsWithImages(productsWithVariants);
+      } else if(products) {
+        setProductsWithImages(products);
+      }
+    };
+
+    fetchVariants();
+  }, [products, firestore]);
+
+  return productsWithImages;
+}
+
 
 export default function HomePage() {
   const firestore = useFirestore();
@@ -18,7 +52,11 @@ export default function HomePage() {
   const { data: trendingProducts } = useCollection<Product>(trendingQuery);
   
   const newQuery = useMemo(() => productsRef ? query(productsRef, where('isNew', '==', true)) : null, [productsRef]);
-  const { data: newCollection } = useCollection<Product>(newQuery);
+  const { data: newCollectionProducts } = useCollection<Product>(newQuery);
+
+  const trendingProductsWithImages = useProductVariantImages(trendingProducts);
+  const newCollectionWithImages = useProductVariantImages(newCollectionProducts);
+
 
   return (
     <>
@@ -51,8 +89,8 @@ export default function HomePage() {
             </Button>
         </div>
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {trendingProducts?.slice(0, 4).map(product => (
-            <ProductCard key={product.id} product={product} />
+          {trendingProductsWithImages?.slice(0, 4).map(product => (
+            <ProductCard key={product.id} product={product} variantImageId={product.firstVariantImageId} />
           ))}
         </div>
       </section>
@@ -66,8 +104,8 @@ export default function HomePage() {
                 </Button>
             </div>
             <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {newCollection?.slice(0, 4).map(product => (
-                <ProductCard key={product.id} product={product} />
+            {newCollectionWithImages?.slice(0, 4).map(product => (
+                <ProductCard key={product.id} product={product} variantImageId={product.firstVariantImageId} />
             ))}
             </div>
         </div>

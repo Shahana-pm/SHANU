@@ -1,29 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
-import type { Product, ProductVariant } from "@/lib/types";
+import type { Product } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Badge } from "@/components/ui/badge";
-import { useCollection, useFirestore } from "@/firebase";
-import { collection, limit, query } from "firebase/firestore";
-import { useMemo } from "react";
 
 interface ProductCardProps {
   product: Product;
+  variantImageId?: string; // Optional: Pass a specific image to display
 }
 
-export function ProductCard({ product }: ProductCardProps) {
-  const firestore = useFirestore();
-
-  const variantsRef = useMemo(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'products', product.id, 'variants'), limit(1));
-  }, [firestore, product.id]);
-
-  const { data: variants } = useCollection<ProductVariant>(variantsRef);
-
-  const firstVariant = variants?.[0];
-  const firstVariantImageId = firstVariant?.imageIds[0];
-  const image = PlaceHolderImages.find(img => img.id === firstVariantImageId);
+export function ProductCard({ product, variantImageId }: ProductCardProps) {
+  // Find the image from the provided ID or fallback to a default/placeholder logic if needed
+  const image = PlaceHolderImages.find(img => img.id === variantImageId);
 
   return (
     <Link href={`/products/${product.id}`} className="group">
@@ -39,7 +27,9 @@ export function ProductCard({ product }: ProductCardProps) {
               data-ai-hint={image.imageHint}
             />
           ) : (
-            <div className="w-full h-full bg-secondary"/>
+             <div className="w-full h-full bg-secondary flex items-center justify-center">
+                <span className="text-xs text-muted-foreground">No Image</span>
+             </div>
           )}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
             {product.isNew && <Badge variant="default">New</Badge>}

@@ -1,15 +1,39 @@
 'use client';
 import { ProductCard } from "@/components/product-card";
 import { useCollection, useFirestore } from "@/firebase";
-import { Product } from "@/lib/types";
-import { collection } from "firebase/firestore";
-import { useMemo } from "react";
+import { Product, ProductVariant } from "@/lib/types";
+import { collection, getDocs } from "firebase/firestore";
+import { useMemo, useEffect, useState } from "react";
+
+type ProductWithFirstVariant = Product & { firstVariantImageId?: string };
 
 export default function ProductsPage() {
   const firestore = useFirestore();
-  
+  const [productsWithImages, setProductsWithImages] = useState<ProductWithFirstVariant[]>([]);
+
   const productsCollection = useMemo(() => firestore ? collection(firestore, "products") : null, [firestore]);
-  const { data: products } = useCollection<Product>(productsCollection);
+  const { data: products, loading } = useCollection<Product>(productsCollection);
+
+  useEffect(() => {
+    const fetchVariants = async () => {
+      if (products && firestore) {
+        const productsWithVariants = await Promise.all(
+          products.map(async (product) => {
+            const variantsRef = collection(firestore, 'products', product.id, 'variants');
+            const variantsSnap = await getDocs(variantsRef);
+            if (!variantsSnap.empty) {
+              const firstVariant = variantsSnap.docs[0].data() as ProductVariant;
+              return { ...product, firstVariantImageId: firstVariant.imageIds[0] };
+            }
+            return product;
+          })
+        );
+        setProductsWithImages(productsWithVariants);
+      }
+    };
+
+    fetchVariants();
+  }, [products, firestore]);
 
   return (
     <div className="container py-12">
@@ -19,12 +43,15 @@ export default function ProductsPage() {
           Explore our curated collection of modern and stylish products for your home.
         </p>
       </div>
-
-      <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {products?.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+        {loading ? (
+            <p>Loading products...</p>
+        ) : (
+            <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {productsWithImages.map((product) => (
+                <ProductCard key={product.id} product={product} variantImageId={product.firstVariantImageId} />
+                ))}
+            </div>
+        )}
     </div>
   );
 }
