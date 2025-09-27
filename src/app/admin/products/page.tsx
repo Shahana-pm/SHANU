@@ -19,28 +19,17 @@ import {
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { useFirestore } from "@/firebase";
+import { useCollection, useFirestore } from "@/firebase";
 import { Product } from "@/lib/types";
-import { collection, getDocs } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { collection } from "firebase/firestore";
+import { useMemo } from "react";
 
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
   const firestore = useFirestore();
 
-  useEffect(() => {
-    if (!firestore) return;
-    const fetchProducts = async () => {
-      const productsCollection = collection(firestore, "products");
-      const productSnapshot = await getDocs(productsCollection);
-      const productList = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-      setProducts(productList);
-    };
-
-    fetchProducts();
-  }, [firestore]);
-
+  const productsCollection = useMemo(() => firestore ? collection(firestore, "products") : null, [firestore]);
+  const { data: products } = useCollection<Product>(productsCollection);
 
   return (
     <div>
@@ -62,7 +51,7 @@ export default function AdminProductsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product) => (
+            {products?.map((product) => (
               <TableRow key={product.id}>
                 <TableCell className="font-medium">{product.name}</TableCell>
                 <TableCell>{product.category}</TableCell>

@@ -4,36 +4,21 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
 import { ArrowRight } from "lucide-react";
-import { useFirestore } from "@/firebase";
+import { useCollection, useFirestore } from "@/firebase";
 import { Product } from "@/lib/types";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { collection, query, where } from "firebase/firestore";
+import { useMemo } from "react";
 
 export default function HomePage() {
-  const [trendingProducts, setTrendingProducts] = useState<Product[]>([]);
-  const [newCollection, setNewCollection] = useState<Product[]>([]);
   const firestore = useFirestore();
 
-  useEffect(() => {
-    if (!firestore) return;
-    
-    const fetchProducts = async () => {
-      const productsRef = collection(firestore, 'products');
-
-      // Fetch trending products
-      const trendingQuery = query(productsRef, where('isTrending', '==', true));
-      const trendingSnapshot = await getDocs(trendingQuery);
-      setTrendingProducts(trendingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)).slice(0, 4));
-
-      // Fetch new collection
-      const newQuery = query(productsRef, where('isNew', '==', true));
-      const newSnapshot = await getDocs(newQuery);
-      setNewCollection(newSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)).slice(0, 4));
-    };
-
-    fetchProducts();
-  }, [firestore]);
-
+  const productsRef = useMemo(() => firestore ? collection(firestore, 'products') : null, [firestore]);
+  
+  const trendingQuery = useMemo(() => productsRef ? query(productsRef, where('isTrending', '==', true)) : null, [productsRef]);
+  const { data: trendingProducts } = useCollection<Product>(trendingQuery);
+  
+  const newQuery = useMemo(() => productsRef ? query(productsRef, where('isNew', '==', true)) : null, [productsRef]);
+  const { data: newCollection } = useCollection<Product>(newQuery);
 
   return (
     <>
@@ -66,7 +51,7 @@ export default function HomePage() {
             </Button>
         </div>
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {trendingProducts.map(product => (
+          {trendingProducts?.slice(0, 4).map(product => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
@@ -81,7 +66,7 @@ export default function HomePage() {
                 </Button>
             </div>
             <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {newCollection.map(product => (
+            {newCollection?.slice(0, 4).map(product => (
                 <ProductCard key={product.id} product={product} />
             ))}
             </div>

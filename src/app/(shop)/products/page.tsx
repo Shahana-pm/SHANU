@@ -1,26 +1,15 @@
 'use client';
 import { ProductCard } from "@/components/product-card";
-import { useFirestore } from "@/firebase";
+import { useCollection, useFirestore } from "@/firebase";
 import { Product } from "@/lib/types";
-import { collection, getDocs } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { collection } from "firebase/firestore";
+import { useMemo } from "react";
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
   const firestore = useFirestore();
-
-  useEffect(() => {
-    if (!firestore) return;
-    const fetchProducts = async () => {
-      const productsCollection = collection(firestore, "products");
-      const productSnapshot = await getDocs(productsCollection);
-      const productList = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-      setProducts(productList);
-    };
-
-    fetchProducts();
-  }, [firestore]);
-
+  
+  const productsCollection = useMemo(() => firestore ? collection(firestore, "products") : null, [firestore]);
+  const { data: products } = useCollection<Product>(productsCollection);
 
   return (
     <div className="container py-12">
@@ -32,7 +21,7 @@ export default function ProductsPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {products.map((product) => (
+        {products?.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>

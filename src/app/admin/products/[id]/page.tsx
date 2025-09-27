@@ -1,31 +1,20 @@
 'use client';
 import { notFound } from "next/navigation";
-import { useFirestore } from "@/firebase";
+import { useDoc, useFirestore } from "@/firebase";
 import { Product } from "@/lib/types";
-import { doc, getDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { doc } from "firebase/firestore";
+import { useMemo } from "react";
 import EditProductForm from "./edit-product-form";
 
 export default function AdminProductEditPage({ params }: { params: { id: string } }) {
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
   const firestore = useFirestore();
-
-  useEffect(() => {
-    if (!firestore) return;
-    const fetchProduct = async () => {
-      const docRef = doc(firestore, "products", params.id);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setProduct({ id: docSnap.id, ...docSnap.data() } as Product);
-      } else {
-        notFound();
-      }
-      setLoading(false);
-    };
-
-    fetchProduct();
+  
+  const productRef = useMemo(() => {
+    if (!firestore) return null;
+    return doc(firestore, "products", params.id);
   }, [firestore, params.id]);
+
+  const { data: product, loading } = useDoc<Product>(productRef);
 
   if (loading) {
     return <div>Loading...</div>;
