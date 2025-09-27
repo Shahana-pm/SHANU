@@ -25,16 +25,15 @@ import { doc, writeBatch, collection } from "firebase/firestore";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { PlusCircle, Trash2 } from "lucide-react";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { ImageUploader } from "@/components/admin/image-uploader";
 
 
 const variantSchema = z.object({
   id: z.string().optional(),
   color: z.string().min(1, "Color is required"),
   colorHex: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid hex code"),
-  imageIds: z.array(z.string()).min(1, "At least one image ID is required"),
+  imageUrl: z.string().nullable().optional(),
 });
 
 const formSchema = z.object({
@@ -76,7 +75,6 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
     name: "variants",
   });
   
-  // Keep track of variants that are removed to delete them from Firestore
   const [removedVariants, setRemovedVariants] = React.useState<string[]>([]);
 
   const handleRemoveVariant = (index: number) => {
@@ -112,13 +110,12 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
       const variantData = {
         color: variant.color,
         colorHex: variant.colorHex,
-        imageIds: variant.imageIds,
+        imageUrl: variant.imageUrl,
       };
       
       batch.set(variantRef, variantData, { merge: true });
     });
 
-    // Delete variants that were removed
     removedVariants.forEach(variantId => {
         const variantRef = doc(firestore, "products", product.id, "variants", variantId);
         batch.delete(variantRef);
@@ -211,25 +208,17 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
                             
                             <FormField
                               control={form.control}
-                              name={`variants.${index}.imageIds.0`}
+                              name={`variants.${index}.imageUrl`}
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Primary Image</FormLabel>
-                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select an image" />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      {PlaceHolderImages.map(img => (
-                                        <SelectItem key={img.id} value={img.id}>
-                                          {img.description} ({img.id})
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                  <FormDescription>This is the main image for this product variant.</FormDescription>
+                                  <FormControl>
+                                    <ImageUploader 
+                                      onUploadSuccess={(url) => field.onChange(url)}
+                                      initialImageUrl={field.value}
+                                    />
+                                  </FormControl>
+                                  <FormDescription>Upload the main image for this product variant.</FormDescription>
                                   <FormMessage />
                                 </FormItem>
                               )}
@@ -238,7 +227,7 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
                             <Button type="button" variant="destructive" size="icon" className="absolute top-4 right-4" onClick={() => handleRemoveVariant(index)}><Trash2 className="h-4 w-4" /></Button>
                         </div>
                     ))}
-                     <Button type="button" variant="outline" onClick={() => append({ color: '', colorHex: '#000000', imageIds: [''] })}>
+                     <Button type="button" variant="outline" onClick={() => append({ color: '', colorHex: '#000000', imageUrl: '' })}>
                         <PlusCircle className="mr-2 h-4 w-4"/> Add Variant
                     </Button>
                 </CardContent>

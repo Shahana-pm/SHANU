@@ -5,7 +5,7 @@ import { Product, ProductVariant } from "@/lib/types";
 import { collection, query, where, getDocs, limit } from "firebase/firestore";
 import { useMemo, useState, useEffect } from "react";
 
-type ProductWithFirstVariant = Product & { firstVariantImageId?: string };
+type ProductWithFirstVariant = Product & { firstVariantImageUrl?: ProductVariant['imageUrl'] };
 
 export default function DressesPage() {
   const firestore = useFirestore();
@@ -30,7 +30,7 @@ export default function DressesPage() {
             const variantsSnap = await getDocs(q);
             if (!variantsSnap.empty) {
               const firstVariant = variantsSnap.docs[0].data() as ProductVariant;
-              return { ...product, firstVariantImageId: firstVariant.imageIds[0] };
+              return { ...product, firstVariantImageUrl: firstVariant.imageUrl };
             }
             return product;
           })
@@ -69,7 +69,7 @@ export default function DressesPage() {
       ) : (
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {productsWithImages.map((product) => (
-            <ProductCard key={product.id} product={product} variantImageId={product.firstVariantImageId} />
+            <ProductCard key={product.id} product={product} variantImageUrl={product.firstVariantImageUrl} />
           ))}
         </div>
       )}

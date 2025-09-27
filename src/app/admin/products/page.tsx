@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -26,11 +27,10 @@ import { useMemo, useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddProductDialog } from "./add-product-dialog";
 
-type ProductWithFirstVariant = Product & { firstVariantImageId?: string };
+type ProductWithFirstVariant = Product & { firstVariantImage?: ProductVariant['imageUrl'] };
 
 export default function AdminProductsPage() {
   const firestore = useFirestore();
@@ -53,7 +53,7 @@ export default function AdminProductsPage() {
             const variantsSnap = await getDocs(q);
             if (!variantsSnap.empty) {
               const firstVariant = variantsSnap.docs[0].data() as ProductVariant;
-              return { ...product, firstVariantImageId: firstVariant.imageIds[0] };
+              return { ...product, firstVariantImage: firstVariant.imageUrl };
             }
             return product;
           })
@@ -131,18 +131,16 @@ export default function AdminProductsPage() {
                 ))
             ) : (
                 productsWithImages?.map((product) => {
-                const image = PlaceHolderImages.find(img => img.id === product.firstVariantImageId);
                 return (
                 <TableRow key={product.id}>
                     <TableCell>
                         <div className="relative h-16 w-16 rounded-md overflow-hidden bg-secondary">
-                        {image ? (
+                        {product.firstVariantImage ? (
                             <Image
-                            src={image.imageUrl}
+                            src={product.firstVariantImage}
                             alt={product.name}
                             fill
                             className="object-cover"
-                            data-ai-hint={image.imageHint}
                             sizes="64px"
                             />
                         ) : (

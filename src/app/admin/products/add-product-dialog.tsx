@@ -32,16 +32,15 @@ import { doc, writeBatch, collection } from "firebase/firestore";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { PlusCircle, Trash2 } from "lucide-react";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { ImageUploader } from "@/components/admin/image-uploader";
 
 
 const variantSchema = z.object({
   id: z.string().optional(),
   color: z.string().min(1, "Color is required"),
   colorHex: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid hex code"),
-  imageIds: z.array(z.string()).min(1, "At least one image ID is required"),
+  imageUrl: z.string().nullable().optional(),
 });
 
 const formSchema = z.object({
@@ -68,7 +67,7 @@ export function AddProductDialog() {
       description: "",
       isNew: true,
       isTrending: false,
-      variants: [{ color: "", colorHex: "#000000", imageIds: [""] }],
+      variants: [{ color: "", colorHex: "#000000", imageUrl: null }],
     },
   });
 
@@ -99,7 +98,7 @@ export function AddProductDialog() {
       const variantData = {
         color: variant.color,
         colorHex: variant.colorHex,
-        imageIds: variant.imageIds,
+        imageUrl: variant.imageUrl,
       };
       batch.set(variantRef, variantData);
     });
@@ -207,36 +206,29 @@ export function AddProductDialog() {
                                         <FormField control={form.control} name={`variants.${index}.colorHex`} render={({ field }) => (<FormItem><FormLabel>Color Hex</FormLabel><FormControl><Input placeholder="#000000" {...field} /></FormControl><FormMessage /></FormItem>)} />
                                         
                                         <FormField
-                                        control={form.control}
-                                        name={`variants.${index}.imageIds.0`}
-                                        render={({ field }) => (
-                                            <FormItem>
-                                            <FormLabel>Primary Image</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            control={form.control}
+                                            name={`variants.${index}.imageUrl`}
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                <FormLabel>Primary Image</FormLabel>
                                                 <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select an image" />
-                                                </SelectTrigger>
+                                                    <ImageUploader 
+                                                        onUploadSuccess={(url) => field.onChange(url)}
+                                                        initialImageUrl={field.value}
+                                                    />
                                                 </FormControl>
-                                                <SelectContent>
-                                                {PlaceHolderImages.map(img => (
-                                                    <SelectItem key={img.id} value={img.id}>
-                                                    {img.description} ({img.id})
-                                                    </SelectItem>
-                                                ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormDescription>This is the main image for this product variant.</FormDescription>
-                                            <FormMessage />
-                                            </FormItem>
-                                        )}
+                                                <FormDescription>Upload the main image for this product variant.</FormDescription>
+                                                <FormMessage />
+                                                </FormItem>
+                                            )}
                                         />
+
                                         {fields.length > 1 && (
                                             <Button type="button" variant="destructive" size="icon" className="absolute top-4 right-4" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
                                         )}
                                     </div>
                                 ))}
-                                <Button type="button" variant="outline" onClick={() => append({ color: '', colorHex: '#000000', imageIds: [''] })}>
+                                <Button type="button" variant="outline" onClick={() => append({ color: '', colorHex: '#000000', imageUrl: null })}>
                                     <PlusCircle className="mr-2 h-4 w-4"/> Add Variant
                                 </Button>
                                 <FormMessage>{form.formState.errors.variants?.message}</FormMessage>

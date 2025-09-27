@@ -1,30 +1,25 @@
 import Link from "next/link";
 import Image from "next/image";
-import type { Product } from "@/lib/types";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import type { Product, ProductVariant } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 
 interface ProductCardProps {
   product: Product;
-  variantImageId?: string; // Optional: Pass a specific image to display
+  variantImageUrl?: ProductVariant['imageUrl']; 
 }
 
-export function ProductCard({ product, variantImageId }: ProductCardProps) {
-  // Find the image from the provided ID or fallback to a default/placeholder logic if needed
-  const image = PlaceHolderImages.find(img => img.id === variantImageId);
-
+export function ProductCard({ product, variantImageUrl }: ProductCardProps) {
   return (
     <Link href={`/products/${product.id}`} className="group">
       <div className="overflow-hidden rounded-lg">
         <div className="relative aspect-[4/5] w-full overflow-hidden bg-secondary">
-          {image ? (
+          {variantImageUrl ? (
             <Image
-              src={image.imageUrl}
+              src={variantImageUrl}
               alt={product.name}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover transition-transform duration-300 group-hover:scale-105"
-              data-ai-hint={image.imageHint}
             />
           ) : (
              <div className="w-full h-full bg-secondary flex items-center justify-center">

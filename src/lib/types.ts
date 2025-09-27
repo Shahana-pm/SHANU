@@ -2,7 +2,7 @@ export type ProductVariant = {
   id: string;
   color: string;
   colorHex: string;
-  imageIds: string[];
+  imageUrl: string | null; // Changed from imageIds to a single optional URL
 };
 
 export type ProductReview = {
@@ -31,6 +31,6 @@ export type CartItem = {
   quantity: number;
   price: number;
   name: string;
-  image: string;
+  image: string | null; // Changed from string to string | null
   color: string;
 };

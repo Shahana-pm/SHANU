@@ -43,7 +43,7 @@ export function ProductInfo({ product, variants, reviews }: ProductInfoProps) {
         price: product.price,
         name: product.name,
         color: selectedVariant.color,
-        image: selectedVariant.imageIds[0],
+        image: selectedVariant.imageUrl,
       },
     });
     toast({

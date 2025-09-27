@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useCart } from "@/hooks/use-cart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Separator } from "@/components/ui/separator";
 import { X } from "lucide-react";
 
@@ -46,19 +45,15 @@ export default function CartPage() {
         <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
           <div className="lg:col-span-2 space-y-6">
             {state.items.map((item) => {
-              const image = PlaceHolderImages.find(
-                (img) => img.id === item.image
-              );
               return (
                 <div key={`${item.productId}-${item.variantId}`} className="flex flex-col sm:flex-row gap-4">
                   <div className="relative h-32 w-32 sm:h-24 sm:w-24 self-center overflow-hidden rounded-md bg-secondary">
-                    {image && (
+                    {item.image && (
                       <Image
-                        src={image.imageUrl}
+                        src={item.image}
                         alt={item.name}
                         fill
                         className="object-cover"
-                        data-ai-hint={image.imageHint}
                       />
                     )}
                   </div>
