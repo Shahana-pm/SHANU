@@ -29,6 +29,7 @@ import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddProductDialog } from "./add-product-dialog";
+import { Button } from "@/components/ui/button";
 
 type ProductWithFirstVariant = Product & { firstVariantImage?: ProductVariant['imageUrl'] };
 
