@@ -82,7 +82,7 @@ export const products: Product[] = [
   },
   {
     id: 'orbit-clock',
-    name: 'Orbit Wall Clock',
+    name: 'Orbit Wall clooo',
     category: 'Decor',
     price: 80,
     description: 'Keep track of time in style with the Orbit Wall Clock. Its silent sweep movement and simple, elegant design make it a subtle yet striking addition to your wall.',
