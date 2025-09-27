@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from "react";
@@ -16,23 +17,22 @@ export function useProductsWithImages(productsQuery: Query | null) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    // Immediately set loading state based on initial products loading
-    setLoading(productsLoading);
-    setError(productsError);
-
-    if (productsLoading || productsError || !products) {
-      // If products are loading, errored, or null, we shouldn't proceed to fetch variants.
-      // If products are simply null/empty after loading, we should reflect that.
-      if (!productsLoading) {
-        setProductsWithImages([]);
-      }
+    if (productsLoading) {
+      setLoading(true);
       return;
     }
-    
-    if (!firestore) {
-      // If firestore is not available yet, we can't fetch variants.
-      // Treat products as if they have no variant images.
-      setProductsWithImages(products);
+    if (productsError) {
+      setError(productsError);
+      setLoading(false);
+      return;
+    }
+    if (!products || !firestore) {
+      setLoading(false);
+      setProductsWithImages([]);
+      return;
+    }
+    if (products.length === 0) {
+      setProductsWithImages([]);
       setLoading(false);
       return;
     }
@@ -54,7 +54,6 @@ export function useProductsWithImages(productsQuery: Query | null) {
               }
             } catch (e) {
               console.error(`Error fetching variant for product ${product.id}:`, e);
-              // Fallback for single variant fetch failure
             }
             return product; // Return product without image if no variants or error
           })
@@ -68,8 +67,7 @@ export function useProductsWithImages(productsQuery: Query | null) {
         console.error("Error fetching product variants:", e);
         if (!isCancelled) {
           setError(e);
-          // Fallback to products without images on error
-          setProductsWithImages(products);
+          setProductsWithImages(products); // Fallback to products without images on error
         }
       } finally {
         if (!isCancelled) {
