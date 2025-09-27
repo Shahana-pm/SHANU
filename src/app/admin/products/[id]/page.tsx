@@ -6,13 +6,13 @@ import { doc } from "firebase/firestore";
 import { useMemo } from "react";
 import EditProductForm from "./edit-product-form";
 
-export default function AdminProductEditPage({ params }: { params: { id: string } }) {
+export default function AdminProductEditPage({ params: { id } }: { params: { id: string } }) {
   const firestore = useFirestore();
   
   const productRef = useMemo(() => {
-    if (!firestore || !params.id) return null;
-    return doc(firestore, "products", params.id);
-  }, [firestore, params.id]);
+    if (!firestore || !id) return null;
+    return doc(firestore, "products", id);
+  }, [firestore, id]);
 
   const { data: product, loading } = useDoc<Product>(productRef);
 
