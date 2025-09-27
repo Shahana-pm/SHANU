@@ -47,10 +47,14 @@ export default function SignupPage() {
       router.push("/admin");
     } catch (error: any) {
       console.error(error);
+      let description = error.message;
+      if (error.code === 'auth/email-already-in-use') {
+        description = "This email address is already in use. Please try another one or log in.";
+      }
       toast({
         variant: "destructive",
         title: "Signup Failed",
-        description: error.message,
+        description: description,
       });
     } finally {
       setIsLoading(false);
