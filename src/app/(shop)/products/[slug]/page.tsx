@@ -18,7 +18,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <div className="container py-12">
-      <div className="grid md:grid-cols-2 gap-12">
+      <div className="grid md:grid-cols-2 gap-12 items-start">
         <ProductGallery product={product} />
         <ProductInfo product={product} />
       </div>
