@@ -1,61 +1,54 @@
 
 'use client';
+import { useState, useEffect } from 'react';
+import { collection, getDocs, limit, query, Query, CollectionReference } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
+import type { Product, ProductVariant } from '@/lib/types';
 
-import { useState, useEffect } from "react";
-import { useCollection, useFirestore } from "@/firebase";
-import { collection, query, limit, getDocs, Query } from "firebase/firestore";
-import { Product, ProductVariant } from "@/lib/types";
+interface ProductWithImage extends Product {
+  firstVariantImageUrl?: string;
+}
 
-export type ProductWithFirstVariant = Product & { firstVariantImageUrl?: ProductVariant['imageUrl'] };
-
-export function useProductsWithFirstVariant(productsQuery: Query | null) {
-  const firestore = useFirestore();
-  const { data: products, loading: productsLoading, error: productsError } = useCollection<Product>(productsQuery);
-
-  const [productsWithImages, setProductsWithImages] = useState<ProductWithFirstVariant[]>([]);
+export function useProductsWithFirstVariant(productsQuery: Query | CollectionReference | null) {
+  const [productsWithImages, setProductsWithImages] = useState<ProductWithImage[]>([]);
   const [loading, setLoading] = useState(true);
+  const firestore = useFirestore();
 
   useEffect(() => {
-    if (productsLoading) {
-      setLoading(true);
-      return;
-    }
-
-    if (!firestore || !products) {
-      setProductsWithImages([]);
+    if (!productsQuery || !firestore) {
       setLoading(false);
       return;
     }
 
-    const fetchVariants = async () => {
+    const fetchProductsAndImages = async () => {
       setLoading(true);
       try {
-        const productsWithVariants = await Promise.all(
-          products.map(async (product) => {
-            const variantsRef = collection(firestore, 'products', product.id, 'variants');
-            const q = query(variantsRef, limit(1));
-            const variantsSnap = await getDocs(q);
+        const productSnapshot = await getDocs(productsQuery);
+        const products = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
 
-            if (!variantsSnap.empty) {
-              const firstVariant = variantsSnap.docs[0].data() as ProductVariant;
-              return { ...product, firstVariantImageUrl: firstVariant.imageUrl };
-            }
-            return { ...product, firstVariantImageUrl: undefined }; 
-          })
-        );
-        setProductsWithImages(productsWithVariants);
+        const productsWithImagesPromises = products.map(async (product) => {
+          const variantsRef = collection(firestore, 'products', product.id, 'variants');
+          const q = query(variantsRef, limit(1));
+          const variantSnap = await getDocs(q);
+          let imageUrl: string | undefined = undefined;
+          if (!variantSnap.empty) {
+            const firstVariant = variantSnap.docs[0].data() as ProductVariant;
+            imageUrl = firstVariant.imageUrl;
+          }
+          return { ...product, firstVariantImageUrl: imageUrl };
+        });
+
+        const resolvedProducts = await Promise.all(productsWithImagesPromises);
+        setProductsWithImages(resolvedProducts);
       } catch (error) {
-        console.error("Error fetching product variants:", error);
-        // Fallback to products without images on error
-        setProductsWithImages(products);
+        console.error("Error fetching products with variants:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchVariants();
+    fetchProductsAndImages();
+  }, [productsQuery, firestore]);
 
-  }, [products, productsLoading, firestore]);
-
-  return { productsWithImages, loading: productsLoading || loading, error: productsError };
+  return { productsWithImages, loading };
 }
