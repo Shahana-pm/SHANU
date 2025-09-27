@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,10 +20,16 @@ export default function AdminDashboardPage() {
       });
     } catch (error: any) {
       console.error("Error seeding database:", error);
+      
+      let description = "Could not seed the database. Check the console.";
+      if (error.message.includes("Database is not empty")) {
+        description = "Database already contains data. Seeding was skipped to prevent overwriting your products."
+      }
+
       toast({
         variant: "destructive",
-        title: "Seeding Failed",
-        description: error.message || "Could not seed the database. Check the console.",
+        title: "Seeding Skipped or Failed",
+        description: description,
       });
     }
   }
@@ -89,3 +96,5 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
+    

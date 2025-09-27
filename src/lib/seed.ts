@@ -1,9 +1,10 @@
+
 // This is a script to seed your Firestore database with initial product data.
 // To run this script, you would typically use a command like `ts-node src/lib/seed.ts`
 // in a real project setup. For this environment, we will trigger it manually.
 
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, collection, writeBatch, doc } from 'firebase/firestore';
+import { getFirestore, collection, writeBatch, doc, getDocs, query, limit } from 'firebase/firestore';
 import { firebaseConfig } from '../firebase/config';
 
 // The image URLs are now direct URLs to placeholder images.
@@ -18,9 +19,9 @@ const originalProducts = [
       isTrending: true,
       isNew: false,
       variants: [
-        { id: 'aero-black', color: 'Midnight Black', colorHex: '#111827', imageUrl: 'https://images.unsplash.com/photo-1681394949029-fb3d12e96650?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxtb2Rlcm4lMjBjaGFpcnxlbnwwfHx8fDE3NTg5MTk2NTV8MA&ixlib=rb-4.1.0&q=80&w=1080' },
-        { id: 'aero-white', color: 'Cloud White', colorHex: '#f9fafb', imageUrl: 'https://images.unsplash.com/photo-1569520792347-a4da4f048f55?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx3aGl0ZSUyMGNoYWlyfGVufDB8fHx8MTc1ODk4MzM1OHww&ixlib=rb-4.1.0&q=80&w=1080' },
-        { id: 'aero-grey', color: 'Slate Grey', colorHex: '#4b5563', imageUrl: 'https://images.unsplash.com/photo-1629456515374-9a3fa05f5677?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Z3JleSUyMGNoYWlyfGVufDB8fHx8MTc1ODk4MzM1OHww&ixlib=rb-4.1.0&q=80&w=1080' },
+        { id: 'aero-black', color: 'Midnight Black', colorHex: '#111827', imageUrl: '/Product-img/img_chair_1.jpeg' },
+        { id: 'aero-white', color: 'Cloud White', colorHex: '#f9fafb', imageUrl: '/Product-img/img_chair_2.jpeg' },
+        { id: 'aero-grey', color: 'Slate Grey', colorHex: '#4b5563', imageUrl: '/Product-img/img_chair_3.jpeg' },
       ],
       reviews: [
         { id: 'rev1', author: 'Jane D.', rating: 5, title: 'Best chair ever!', comment: 'So comfortable and stylish. I can sit for hours without any back pain.', date: '2023-05-15' },
@@ -36,8 +37,8 @@ const originalProducts = [
       isTrending: false,
       isNew: true,
       variants: [
-        { id: 'luna-black', color: 'Matte Black', colorHex: '#1f2937', imageUrl: 'https://images.unsplash.com/photo-1621447980929-6638614633c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkZXNrJTIwbGFtcHxlbnwwfHx8fDE3NTg4Nzc0MDV8MA&ixlib=rb-4.1.0&q=80&w=1080' },
-        { id: 'luna-silver', color: 'Brushed Silver', colorHex: '#d1d5db', imageUrl: 'https://images.unsplash.com/photo-1621177555452-bedbe4c28879?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxkZXNrJTIwbGFtcHxlbnwwfHx8fDE3NTg4Nzc0MDV8MA&ixlib=rb-4.1.0&q=80&w=1080' },
+        { id: 'luna-black', color: 'Matte Black', colorHex: '#1f2937', imageUrl: '/Product-img/img_lamp_1.jpeg' },
+        { id: 'luna-silver', color: 'Brushed Silver', colorHex: '#d1d5db', imageUrl: '/Product-img/img_lamp_2.jpeg' },
       ],
       reviews: [
         { id: 'rev3', author: 'Emily R.', rating: 5, title: 'Sleek and functional', comment: 'Love the design and the different light settings. It looks great on my desk.', date: '2023-06-01' },
@@ -52,8 +53,8 @@ const originalProducts = [
       isTrending: true,
       isNew: true,
       variants: [
-        { id: 'sofa-grey', color: 'Heather Grey', colorHex: '#6b7280', imageUrl: 'https://images.unsplash.com/photo-1748309025784-d16e142b1cb1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxncmV5JTIwc29mYXxlbnwwfHx8fDE3NTg4ODA4MTZ8MA&ixlib=rb-4.1.0&q=80&w=1080' },
-        { id: 'sofa-blue', color: 'Deep Ocean Blue', colorHex: '#3b82f6', imageUrl: 'https://images.unsplash.com/photo-1658500353909-633499247a62?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxibHVlJTIwc29mYXxlbnwwfHx8fDE3NTg5NjM4NTN8MA&ixlib=rb-4.1.0&q=80&w=1080' },
+        { id: 'sofa-grey', color: 'Heather Grey', colorHex: '#6b7280', imageUrl: '/Product-img/img_sofa_1.jpeg' },
+        { id: 'sofa-blue', color: 'Deep Ocean Blue', colorHex: '#3b82f6', imageUrl: '/Product-img/img_sofa_2.jpeg' },
       ],
       reviews: [
         { id: 'rev4', author: 'Michael B.', rating: 5, title: 'Incredibly comfortable', comment: 'This sofa is a game-changer. My family and I love it.', date: '2023-07-10' },
@@ -69,7 +70,7 @@ const originalProducts = [
       isTrending: false,
       isNew: false,
       variants: [
-        { id: 'table-oak', color: 'Natural Oak', colorHex: '#d97706', imageUrl: 'https://images.unsplash.com/photo-1517870662726-c1d98ee36250?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxkaW5pbmclMjB0YWJsZXxlbnwwfHx8fDE3NTg5NTY2NDJ8MA&ixlib=rb-4.1.0&q=80&w=1080' },
+        { id: 'table-oak', color: 'Natural Oak', colorHex: '#d97706', imageUrl: '/Product-img/img_table_1.jpeg' },
       ],
       reviews: [],
     },
@@ -82,7 +83,7 @@ const originalProducts = [
       isTrending: false,
       isNew: true,
       variants: [
-        { id: 'shelf-wood', color: 'Walnut Finish', colorHex: '#44403c', imageUrl: 'https://images.unsplash.com/photo-1543248939-4296e1fea89b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxib29rc2hlbGZ8ZW58MHx8fHwxNzU4OTE0NzgxfDA&ixlib=rb-4.1.0&q=80&w=1080' },
+        { id: 'shelf-wood', color: 'Walnut Finish', colorHex: '#44403c', imageUrl: '/Product-img/img_shelf_1.jpeg' },
       ],
       reviews: [
         { id: 'rev6', author: 'Chris P.', rating: 4, title: 'Sturdy and stylish', comment: 'Easy to assemble and looks great. Holds a lot of books.', date: '2023-08-01' },
@@ -97,7 +98,7 @@ const originalProducts = [
       isTrending: true,
       isNew: false,
       variants: [
-        { id: 'clock-black', color: 'Black & Gold', colorHex: '#111827', imageUrl: 'https://images.unsplash.com/photo-1564091880021-bb02f2b2928d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3YWxsJTIwY2xvY2t8ZW58MHx8fHwxNzU4OTA2OTQwfDA&ixlib=rb-4.1.0&q=80&w=1080' },
+        { id: 'clock-black', color: 'Black & Gold', colorHex: '#111827', imageUrl: '/Product-img/img_clock_1.jpeg' },
       ],
       reviews: [],
     },
@@ -110,7 +111,7 @@ const originalProducts = [
       isTrending: false,
       isNew: true,
       variants: [
-        { id: 'vase-white', color: 'Matte White', colorHex: '#f9fafb', imageUrl: 'https://images.unsplash.com/photo-1705526966290-2de7b8a33f03?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjZXJhbWljJTIwdmFzZXxlbnwwfHx8fDE3NTg5MjA2NzR8MA&ixlib=rb-4.1.0&q=80&w=1080' },
+        { id: 'vase-white', color: 'Matte White', colorHex: '#f9fafb', imageUrl: '/Product-img/img_vase_1.jpeg' },
       ],
       reviews: [
         { id: 'rev7', author: 'Olivia M.', rating: 5, title: 'Absolutely stunning', comment: 'The texture and shape are so unique. It looks much more expensive than it is.', date: '2023-09-05' },
@@ -125,7 +126,7 @@ const originalProducts = [
       isTrending: true,
       isNew: false,
       variants: [
-        { id: 'plant-green', color: 'Lush Green', colorHex: '#166534', imageUrl: 'https://images.unsplash.com/photo-1694680319722-02b0f4ebd5cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwb3R0ZWQlMjBwbGFudHxlbnwwfHx8fDE3NTg5Mzk0NzB8MA&ixlib=rb-4.1.0&q=80&w=1080' },
+        { id: 'plant-green', color: 'Lush Green', colorHex: '#166534', imageUrl: '/Product-img/img_plant_1.jpeg' },
       ],
       reviews: [
         { id: 'rev8', author: 'David L.', rating: 5, title: 'Looks real!', comment: 'I have a black thumb, so this is perfect for me. Adds a nice pop of color to my office.', date: '2023-09-01' },
@@ -141,6 +142,15 @@ export async function seedDatabase() {
     console.log("Firebase Initialized and Firestore instance created.");
 
     const productsCollection = collection(db, 'products');
+    
+    // Check if the database is already seeded
+    const snapshot = await getDocs(query(productsCollection, limit(1)));
+    if (!snapshot.empty) {
+      console.log("Database already contains products. Skipping seed operation.");
+      // We can throw an error to notify the user properly in the UI.
+      throw new Error("Database is not empty. Seeding was cancelled to prevent data loss.");
+    }
+
     const batch = writeBatch(db);
 
     originalProducts.forEach(product => {
@@ -169,3 +179,5 @@ export async function seedDatabase() {
         throw new Error("Error seeding database");
     }
 }
+
+    
