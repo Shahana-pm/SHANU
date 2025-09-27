@@ -34,7 +34,7 @@ export default function CartPage() {
 
   return (
     <div className="container py-12">
-      <h1 className="font-headline text-4xl font-bold mb-8">Shopping Cart</h1>
+      <h1 className="font-headline text-3xl md:text-4xl font-bold mb-8">Shopping Cart</h1>
       {state.items.length === 0 ? (
         <div className="text-center py-16 border border-dashed rounded-lg">
           <p className="text-muted-foreground mb-4">Your cart is empty.</p>
@@ -43,15 +43,15 @@ export default function CartPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid md:grid-cols-3 gap-12">
-          <div className="md:col-span-2 space-y-6">
+        <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
+          <div className="lg:col-span-2 space-y-6">
             {state.items.map((item) => {
               const image = PlaceHolderImages.find(
                 (img) => img.id === item.image
               );
               return (
-                <div key={`${item.productId}-${item.variantId}`} className="flex gap-4">
-                  <div className="relative h-24 w-24 overflow-hidden rounded-md bg-secondary">
+                <div key={`${item.productId}-${item.variantId}`} className="flex flex-col sm:flex-row gap-4">
+                  <div className="relative h-32 w-32 sm:h-24 sm:w-24 self-center overflow-hidden rounded-md bg-secondary">
                     {image && (
                       <Image
                         src={image.imageUrl}
@@ -62,13 +62,13 @@ export default function CartPage() {
                       />
                     )}
                   </div>
-                  <div className="flex-1 flex justify-between">
-                    <div>
+                  <div className="flex-1 flex flex-col sm:flex-row justify-between gap-4">
+                    <div className="flex-1">
                       <h3 className="font-semibold">{item.name}</h3>
                       <p className="text-sm text-muted-foreground">Color: {item.color}</p>
                       <p className="text-sm font-medium">${item.price.toFixed(2)}</p>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-between sm:justify-start gap-4">
                       <Input
                         type="number"
                         min="1"
@@ -80,7 +80,7 @@ export default function CartPage() {
                             parseInt(e.target.value)
                           )
                         }
-                        className="w-16 h-10 text-center"
+                        className="w-20 h-10 text-center"
                       />
                       <Button
                         variant="ghost"
@@ -90,6 +90,7 @@ export default function CartPage() {
                         }
                       >
                         <X className="h-4 w-4" />
+                        <span className="sr-only">Remove item</span>
                       </Button>
                     </div>
                   </div>

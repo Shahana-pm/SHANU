@@ -39,7 +39,7 @@ export default function HomePage() {
                 <Link href="/products">View All <ArrowRight className="ml-2 h-4 w-4"/></Link>
             </Button>
         </div>
-        <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {trendingProducts.map(product => (
             <ProductCard key={product.id} product={product} />
           ))}
@@ -54,7 +54,7 @@ export default function HomePage() {
                     <Link href="/products">View All <ArrowRight className="ml-2 h-4 w-4"/></Link>
                 </Button>
             </div>
-            <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {newCollection.map(product => (
                 <ProductCard key={product.id} product={product} />
             ))}
