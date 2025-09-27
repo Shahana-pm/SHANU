@@ -6,7 +6,6 @@ import { ShoppingBag, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
 import { useEffect, useState } from "react";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export function SiteHeader() {
   const { state } = useCart();
@@ -20,25 +19,33 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container grid h-16 grid-cols-3 items-center">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="md:hidden"/>
-          <nav className="hidden md:flex items-center space-x-4 text-sm font-medium">
-            <Link href="/hair-accessories" className="transition-colors hover:text-foreground/80">
-              Hair Accessories
+      <div className="container flex h-16 items-center">
+        <div className="mr-4 hidden md:flex">
+          <Link href="/" className="mr-6 flex items-center space-x-2">
+            <span className="hidden font-bold sm:inline-block font-headline">
+              Acme Inc
+            </span>
+          </Link>
+          <nav className="flex items-center space-x-6 text-sm font-medium">
+            <Link
+              href="/products"
+              className="transition-colors hover:text-foreground/80"
+            >
+              Products
             </Link>
-            <Link href="/dresses" className="transition-colors hover:text-foreground/80">
-              Dresses
+            <Link
+              href="#"
+              className="transition-colors hover:text-foreground/80"
+            >
+              Furniture
             </Link>
-            <Link href="/kids" className="transition-colors hover:text-foreground/80">
-              Kids
+            <Link
+              href="#"
+              className="transition-colors hover:text-foreground/80"
+            >
+              Decor
             </Link>
           </nav>
-        </div>
-        <div className="flex justify-center">
-            <Link href="/" className="text-2xl font-bold font-headline">
-                IQRAH SHANU
-            </Link>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <Button variant="ghost" size="icon" asChild>
