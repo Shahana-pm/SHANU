@@ -21,9 +21,6 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container grid h-16 grid-cols-3 items-center">
         <nav className="flex items-center space-x-4 text-sm font-medium">
-          <Link href="/products" className="transition-colors hover:text-foreground/80">
-            Products
-          </Link>
           <Link href="/hair-accessories" className="transition-colors hover:text-foreground/80">
             Hair Accessories
           </Link>
