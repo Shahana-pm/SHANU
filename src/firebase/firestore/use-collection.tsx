@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { onSnapshot, query, collection, where, getDocs, Query, CollectionReference, DocumentData } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { onSnapshot, Query, CollectionReference } from 'firebase/firestore';
+import { FirestorePermissionError } from '../errors';
+import { errorEmitter } from '../error-emitter';
 
 interface FetchHook<T> {
     data: T[] | null;
@@ -25,10 +26,16 @@ export function useCollection<T>(q: Query | CollectionReference | null): FetchHo
             const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
             setData(data);
             setLoading(false);
-        }, (err) => {
-            setError(err);
+            setError(null);
+        }, (serverError) => {
+            const path = 'path' in q ? q.path : 'unknown path';
+            const permissionError = new FirestorePermissionError({
+                path,
+                operation: 'list',
+            });
+            errorEmitter.emit('permission-error', permissionError);
+            setError(permissionError);
             setLoading(false);
-            console.error(err);
         });
 
         return () => unsubscribe();

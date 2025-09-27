@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { onSnapshot, DocumentReference } from 'firebase/firestore';
+import { FirestorePermissionError } from '../errors';
+import { errorEmitter } from '../error-emitter';
 
 interface FetchHook<T> {
     data: T | null;
@@ -27,10 +29,15 @@ export function useDoc<T>(ref: DocumentReference | null): FetchHook<T> {
                 setData(null);
             }
             setLoading(false);
-        }, (err) => {
-            setError(err);
+            setError(null);
+        }, (serverError) => {
+            const permissionError = new FirestorePermissionError({
+                path: ref.path,
+                operation: 'get',
+            });
+            errorEmitter.emit('permission-error', permissionError);
+            setError(permissionError);
             setLoading(false);
-            console.error(err);
         });
 
         return () => unsubscribe();
