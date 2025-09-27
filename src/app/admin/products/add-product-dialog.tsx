@@ -40,7 +40,7 @@ const variantSchema = z.object({
   id: z.string().optional(),
   color: z.string().min(1, "Color is required"),
   colorHex: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid hex code"),
-  imageUrl: z.string().url("Please select a valid image.").min(1, "Image is required."),
+  imageUrl: z.string().min(1, "An image must be selected."),
 });
 
 const formSchema = z.object({
@@ -217,7 +217,7 @@ export function AddProductDialog() {
                                                         initialImageUrl={field.value}
                                                     />
                                                 </FormControl>
-                                                <FormDescription>Select an image from the 'public/product-images' folder.</FormDescription>
+                                                <FormDescription>Select an image from the 'public/Product-img' folder.</FormDescription>
                                                 <FormMessage />
                                                 </FormItem>
                                             )}
