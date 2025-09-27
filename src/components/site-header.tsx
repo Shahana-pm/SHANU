@@ -15,7 +15,7 @@ export function SiteHeader() {
     setIsClient(true);
   }, []);
 
-  const itemCount = isClient ? state.items.reduce((acc, item) => acc + item.quantity, 0) : 0;
+  const itemCount = state.items.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -55,7 +55,7 @@ export function SiteHeader() {
           <Button variant="ghost" size="icon" asChild>
             <Link href="/cart" className="relative">
               <ShoppingBag className="h-5 w-5" />
-              {itemCount > 0 && (
+              {isClient && itemCount > 0 && (
                 <span className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                   {itemCount}
                 </span>
