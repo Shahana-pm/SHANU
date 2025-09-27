@@ -1,9 +1,11 @@
+
 'use client';
 import { ProductCard } from "@/components/product-card";
 import { useFirestore } from "@/firebase";
 import { collection, query, where } from "firebase/firestore";
 import { useMemo } from "react";
 import { useProductsWithFirstVariant } from "@/hooks/use-products-with-first-variant";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function KidsPage() {
   const firestore = useFirestore();
@@ -28,10 +30,10 @@ export default function KidsPage() {
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="space-y-2">
-              <div className="aspect-[4/5] w-full bg-muted animate-pulse rounded-lg"/>
-              <div className="h-4 w-1/4 bg-muted animate-pulse rounded"/>
-              <div className="h-6 w-3/4 bg-muted animate-pulse rounded"/>
-              <div className="h-6 w-1/3 bg-muted animate-pulse rounded"/>
+              <Skeleton className="aspect-[4/5] w-full rounded-lg"/>
+              <Skeleton className="h-4 w-1/4 rounded"/>
+              <Skeleton className="h-6 w-3/4 rounded"/>
+              <Skeleton className="h-6 w-1/3 rounded"/>
             </div>
           ))}
         </div>

@@ -1,3 +1,4 @@
+
 'use client';
 import Link from "next/link";
 import Image from "next/image";
@@ -8,6 +9,22 @@ import { useFirestore } from "@/firebase";
 import { collection, query, where, limit } from "firebase/firestore";
 import { useMemo } from "react";
 import { useProductsWithFirstVariant } from "@/hooks/use-products-with-first-variant";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function ProductGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="space-y-2">
+          <Skeleton className="aspect-[4/5] w-full rounded-lg"/>
+          <Skeleton className="h-4 w-1/4 rounded"/>
+          <Skeleton className="h-6 w-3/4 rounded"/>
+          <Skeleton className="h-6 w-1/3 rounded"/>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export default function HomePage() {
   const firestore = useFirestore();
@@ -50,22 +67,15 @@ export default function HomePage() {
                 <Link href="/products">View All <ArrowRight className="ml-2 h-4 w-4"/></Link>
             </Button>
         </div>
-        <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {trendingLoading ? (
-            Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <div className="aspect-[4/5] w-full bg-muted animate-pulse rounded-lg"/>
-                  <div className="h-4 w-1/4 bg-muted animate-pulse rounded"/>
-                  <div className="h-6 w-3/4 bg-muted animate-pulse rounded"/>
-                  <div className="h-6 w-1/3 bg-muted animate-pulse rounded"/>
-                </div>
-              ))
+        {trendingLoading ? (
+            <ProductGridSkeleton />
           ) : (
-            trendingProducts?.map(product => (
-              <ProductCard key={product.id} product={product} variantImageUrl={product.firstVariantImageUrl} />
-            ))
+            <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {trendingProducts?.map(product => (
+                <ProductCard key={product.id} product={product} variantImageUrl={product.firstVariantImageUrl} />
+              ))}
+            </div>
           )}
-        </div>
       </section>
 
       <section className="bg-secondary/50">
@@ -76,22 +86,15 @@ export default function HomePage() {
                     <Link href="/products">View All <ArrowRight className="ml-2 h-4 w-4"/></Link>
                 </Button>
             </div>
-            <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {newLoading ? (
-               Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <div className="aspect-[4/5] w-full bg-muted animate-pulse rounded-lg"/>
-                  <div className="h-4 w-1/4 bg-muted animate-pulse rounded"/>
-                  <div className="h-6 w-3/4 bg-muted animate-pulse rounded"/>
-                  <div className="h-6 w-1/3 bg-muted animate-pulse rounded"/>
-                </div>
-              ))
+               <ProductGridSkeleton />
             ) : (
-                newCollection?.map(product => (
+              <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {newCollection?.map(product => (
                     <ProductCard key={product.id} product={product} variantImageUrl={product.firstVariantImageUrl} />
-                ))
+                ))}
+              </div>
             )}
-            </div>
         </div>
       </section>
     </>

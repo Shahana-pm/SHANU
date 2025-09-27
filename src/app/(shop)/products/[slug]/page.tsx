@@ -1,3 +1,4 @@
+
 'use client';
 import { notFound } from "next/navigation";
 import { ProductGallery } from "@/components/product-gallery";
@@ -6,14 +7,36 @@ import { useDoc, useFirestore, useCollection } from "@/firebase";
 import { Product, ProductVariant, ProductReview } from "@/lib/types";
 import { doc, collection } from "firebase/firestore";
 import { useMemo } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface ProductPageProps {
-  params: {
-    slug: string;
-  };
+
+function ProductPageSkeleton() {
+  return (
+    <div className="container py-8 md:py-12">
+      <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
+        <div className="grid md:grid-cols-[80px_1fr] gap-4">
+            <div/>
+            <Skeleton className="aspect-[3/4] w-full rounded-lg"/>
+        </div>
+        <div className="space-y-6">
+            <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-full" />
+            </div>
+            <Skeleton className="h-6 w-1/3" />
+            <Skeleton className="h-20 w-full" />
+             <div className="flex items-center gap-4">
+                <Skeleton className="h-12 w-32 rounded-md" />
+                <Skeleton className="h-12 flex-1 rounded-md" />
+            </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
-export default function ProductPage({ params }: ProductPageProps) {
+
+export default function ProductPage({ params }: { params: { slug: string } }) {
   const firestore = useFirestore();
   const { slug } = params;
 
@@ -39,7 +62,7 @@ export default function ProductPage({ params }: ProductPageProps) {
   const loading = productLoading || variantsLoading || reviewsLoading;
 
   if (loading) {
-    return <div className="container py-8 md:py-12">Loading...</div>;
+    return <ProductPageSkeleton />;
   }
 
   if (!product) {
