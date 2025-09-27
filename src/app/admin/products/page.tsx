@@ -54,6 +54,11 @@ export default function AdminProductsPage() {
           operation: 'delete',
         });
         errorEmitter.emit('permission-error', permissionError);
+        toast({
+          variant: "destructive",
+          title: "Deletion Failed",
+          description: `Could not delete "${productName}". Check permissions.`,
+        });
       });
   }
 
