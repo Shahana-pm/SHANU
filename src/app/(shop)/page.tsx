@@ -4,11 +4,47 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
 import { ArrowRight } from "lucide-react";
-import { useFirestore } from "@/firebase";
-import { collection, query, where, limit } from "firebase/firestore";
-import { useMemo } from "react";
-import { useProductsWithImages } from "@/hooks/use-products-with-images";
+import { useFirestore, useCollection } from "@/firebase";
+import { collection, query, where, limit, getDocs } from "firebase/firestore";
+import { useMemo, useState, useEffect } from "react";
+import { Product, ProductVariant } from "@/lib/types";
 
+type ProductWithFirstVariant = Product & { firstVariantImageUrl?: ProductVariant['imageUrl'] };
+
+function useProductsWithFirstVariant(productsQuery: query | null) {
+  const firestore = useFirestore();
+  const { data: products, loading: productsLoading, error: productsError } = useCollection<Product>(productsQuery);
+
+  const [productsWithImages, setProductsWithImages] = useState<ProductWithFirstVariant[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchVariants = async () => {
+      if (products && firestore) {
+        const productsWithVariants = await Promise.all(
+          products.map(async (product) => {
+            const variantsRef = collection(firestore, 'products', product.id, 'variants');
+            const q = query(variantsRef, limit(1));
+            const variantsSnap = await getDocs(q);
+            if (!variantsSnap.empty) {
+              const firstVariant = variantsSnap.docs[0].data() as ProductVariant;
+              return { ...product, firstVariantImageUrl: firstVariant.imageUrl };
+            }
+            return product;
+          })
+        );
+        setProductsWithImages(productsWithVariants);
+        setLoading(false);
+      } else if (!productsLoading) {
+        setLoading(false);
+      }
+    };
+
+    fetchVariants();
+  }, [products, firestore, productsLoading]);
+
+  return { productsWithImages, loading: loading || productsLoading, error: productsError };
+}
 
 export default function HomePage() {
   const firestore = useFirestore();
@@ -16,10 +52,10 @@ export default function HomePage() {
   const productsRef = useMemo(() => firestore ? collection(firestore, 'products') : null, [firestore]);
   
   const trendingQuery = useMemo(() => productsRef ? query(productsRef, where('isTrending', '==', true), limit(4)) : null, [productsRef]);
-  const { productsWithImages: trendingProductsWithImages, loading: trendingLoading } = useProductsWithImages(trendingQuery);
+  const { productsWithImages: trendingProducts, loading: trendingLoading } = useProductsWithFirstVariant(trendingQuery);
   
   const newQuery = useMemo(() => productsRef ? query(productsRef, where('isNew', '==', true), limit(4)) : null, [productsRef]);
-  const { productsWithImages: newCollectionWithImages, loading: newLoading } = useProductsWithImages(newQuery);
+  const { productsWithImages: newCollection, loading: newLoading } = useProductsWithFirstVariant(newQuery);
 
   return (
     <>
@@ -62,7 +98,7 @@ export default function HomePage() {
                 </div>
               ))
           ) : (
-            trendingProductsWithImages?.map(product => (
+            trendingProducts?.map(product => (
               <ProductCard key={product.id} product={product} variantImageUrl={product.firstVariantImageUrl} />
             ))
           )}
@@ -88,7 +124,7 @@ export default function HomePage() {
                 </div>
               ))
             ) : (
-                newCollectionWithImages?.map(product => (
+                newCollection?.map(product => (
                     <ProductCard key={product.id} product={product} variantImageUrl={product.firstVariantImageUrl} />
                 ))
             )}

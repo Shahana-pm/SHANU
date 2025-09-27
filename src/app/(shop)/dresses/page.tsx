@@ -1,19 +1,56 @@
 'use client';
 import { ProductCard } from "@/components/product-card";
-import { useProductsWithImages } from "@/hooks/use-products-with-images";
-import { useFirestore } from "@/firebase";
-import { collection, query, where } from "firebase/firestore";
-import { useMemo } from "react";
+import { useCollection, useFirestore } from "@/firebase";
+import { collection, query, where, limit, getDocs } from "firebase/firestore";
+import { useMemo, useState, useEffect } from "react";
+import { Product, ProductVariant } from "@/lib/types";
+
+type ProductWithFirstVariant = Product & { firstVariantImageUrl?: ProductVariant['imageUrl'] };
+
+function useProductsWithFirstVariant(productsQuery: query | null) {
+  const firestore = useFirestore();
+  const { data: products, loading: productsLoading, error: productsError } = useCollection<Product>(productsQuery);
+
+  const [productsWithImages, setProductsWithImages] = useState<ProductWithFirstVariant[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchVariants = async () => {
+      if (products && firestore) {
+        const productsWithVariants = await Promise.all(
+          products.map(async (product) => {
+            const variantsRef = collection(firestore, 'products', product.id, 'variants');
+            const q = query(variantsRef, limit(1));
+            const variantsSnap = await getDocs(q);
+            if (!variantsSnap.empty) {
+              const firstVariant = variantsSnap.docs[0].data() as ProductVariant;
+              return { ...product, firstVariantImageUrl: firstVariant.imageUrl };
+            }
+            return product;
+          })
+        );
+        setProductsWithImages(productsWithVariants);
+        setLoading(false);
+      } else if (!productsLoading) {
+        setLoading(false);
+      }
+    };
+
+    fetchVariants();
+  }, [products, firestore, productsLoading]);
+
+  return { productsWithImages, loading: loading || productsLoading, error: productsError };
+}
 
 export default function DressesPage() {
   const firestore = useFirestore();
 
   const productsQuery = useMemo(() => {
     if (!firestore) return null;
-    return query(collection(firestore, "products"), where("category", "==", "Dresses"));
+    return query(collection(firestore, "products"), where("category", "==", "Chairs"));
   }, [firestore]);
 
-  const { productsWithImages, loading } = useProductsWithImages(productsQuery);
+  const { productsWithImages, loading } = useProductsWithFirstVariant(productsQuery);
 
   return (
     <div className="container py-12">
