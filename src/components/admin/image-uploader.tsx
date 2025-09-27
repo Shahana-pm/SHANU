@@ -7,10 +7,11 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { X, ImagePlus, CheckCircle } from 'lucide-react';
+import { X, ImagePlus, CheckCircle, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import imageCompression from 'browser-image-compression';
 
 interface ImageUploaderProps {
   onUploadSuccess: (url: string) => void;
@@ -19,29 +20,49 @@ interface ImageUploaderProps {
 
 export function ImageUploader({ onUploadSuccess, initialImageUrl }: ImageUploaderProps) {
   const storage = useStorage();
-  const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(initialImageUrl || null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const { toast } = useToast();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit before compression
         toast({
           variant: "destructive",
           title: "File too large",
-          description: "Please select an image smaller than 5MB.",
+          description: "Please select an image smaller than 10MB.",
         });
         return;
       }
-      setFile(file);
-      handleUpload(file);
+      
+      setIsCompressing(true);
+      try {
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        };
+        const compressedFile = await imageCompression(file, options);
+        await handleUpload(compressedFile);
+      } catch (error) {
+        console.error('Image compression failed:', error);
+        toast({
+            variant: "destructive",
+            title: "Compression Failed",
+            description: "Could not compress the image. Please try a different file.",
+        });
+         // Fallback to uploading original file if compression fails
+        await handleUpload(file);
+      } finally {
+        setIsCompressing(false);
+      }
     }
   };
   
-  const handleUpload = (fileToUpload: File) => {
+  const handleUpload = async (fileToUpload: File) => {
     if (!storage || !fileToUpload) return;
 
     setIsUploading(true);
@@ -65,7 +86,6 @@ export function ImageUploader({ onUploadSuccess, initialImageUrl }: ImageUploade
         });
         setIsUploading(false);
         setUploadProgress(null);
-        setFile(null);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
@@ -85,12 +105,12 @@ export function ImageUploader({ onUploadSuccess, initialImageUrl }: ImageUploade
   const handleRemoveImage = () => {
     // Note: This only removes the image from the UI state.
     // It does not delete the file from Firebase Storage.
-    // Implementing deletion would require more complex state management.
     setImageUrl(null);
-    setFile(null);
     setUploadProgress(null);
     onUploadSuccess(''); // Notify parent that image is removed
   };
+
+  const isProcessing = isCompressing || isUploading;
 
   return (
     <div className="space-y-2">
@@ -109,21 +129,30 @@ export function ImageUploader({ onUploadSuccess, initialImageUrl }: ImageUploade
         </div>
       ) : (
         <div className="w-full">
-            <label htmlFor="file-upload" className={cn(
+            <label htmlFor={`file-upload-${React.useId()}`} className={cn(
                 "flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted",
-                isUploading && "cursor-default"
+                isProcessing && "cursor-default opacity-70"
             )}>
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <ImagePlus className="w-8 h-8 mb-4 text-muted-foreground" />
-                    <p className="mb-2 text-sm text-muted-foreground">
-                    <span className="font-semibold">Click to upload</span> or drag and drop
-                    </p>
-                    <p className="text-xs text-muted-foreground">PNG, JPG or GIF (MAX. 5MB)</p>
+                    {isProcessing ? (
+                        <>
+                            <Loader2 className="w-8 h-8 mb-4 text-muted-foreground animate-spin" />
+                            <p className="text-sm text-muted-foreground">{isCompressing ? 'Compressing...' : 'Uploading...'}</p>
+                        </>
+                    ) : (
+                        <>
+                            <ImagePlus className="w-8 h-8 mb-4 text-muted-foreground" />
+                            <p className="mb-2 text-sm text-muted-foreground">
+                            <span className="font-semibold">Click to upload</span> or drag and drop
+                            </p>
+                            <p className="text-xs text-muted-foreground">PNG, JPG or GIF (MAX. 10MB)</p>
+                        </>
+                    )}
                 </div>
-                <Input id="file-upload" type="file" className="hidden" onChange={handleFileChange} accept="image/png, image/jpeg, image/gif" disabled={isUploading} />
+                <Input id={`file-upload-${React.useId()}`} type="file" className="hidden" onChange={handleFileChange} accept="image/png, image/jpeg, image/gif" disabled={isProcessing} />
             </label>
 
-            {isUploading && uploadProgress !== null && (
+            {isUploading && uploadProgress !== null && !isCompressing && (
                 <div className="flex items-center gap-2 mt-2">
                     <Progress value={uploadProgress} className="w-full" />
                     {uploadProgress === 100 ? <CheckCircle className="h-5 w-5 text-green-500" /> : <span className="text-xs">{Math.round(uploadProgress)}%</span>}
