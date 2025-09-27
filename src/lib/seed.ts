@@ -30,6 +30,19 @@ const originalProducts = [
       ],
     },
     {
+      id: 'velvet-accent-chair',
+      name: 'Velvet Accent Chair',
+      category: 'Chairs',
+      price: 450,
+      description: 'Add a touch of luxury to any room with this plush velvet accent chair. Its elegant design and comfortable cushioning make it the perfect statement piece.',
+      isTrending: false,
+      isNew: true,
+      variants: [
+        { id: 'velvet-green', color: 'Emerald Green', colorHex: '#059669', imageUrl: '/Product-img/img_chair_2.jpeg' },
+      ],
+      reviews: [],
+    },
+    {
       id: 'luna-lamp',
       name: 'Luna Desk Lamp',
       category: 'Lighting',
