@@ -91,6 +91,12 @@ export function SiteHeader() {
                 Sofas
                 </Link>
                 <Link
+                href="/dresses"
+                className="transition-colors hover:text-foreground/80"
+                >
+                Dresses
+                </Link>
+                <Link
                 href="/hair-accessories"
                 className="transition-colors hover:text-foreground/80"
                 >

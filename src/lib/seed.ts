@@ -1,5 +1,6 @@
 
 
+
 // This is a script to seed your Firestore database with initial product data.
 // To run this script, you would typically use a command like `ts-node src/lib/seed.ts`
 // in a real project setup. For this environment, we will trigger it manually.
@@ -145,6 +146,72 @@ const originalProducts = [
       reviews: [
         { id: 'rev8', author: 'David L.', rating: 5, title: 'Looks real!', comment: 'I have a black thumb, so this is perfect for me. Adds a nice pop of color to my office.', date: '2023-09-01' },
       ],
+    },
+    {
+      id: 'flora-maxi-dress',
+      name: 'Flora Maxi Dress',
+      category: 'Dresses',
+      price: 120,
+      description: 'A beautiful flowing maxi dress with a vibrant floral pattern. Perfect for summer days and special occasions.',
+      isTrending: true,
+      isNew: true,
+      variants: [
+        { id: 'flora-blue', color: 'Sky Blue', colorHex: '#87CEEB', imageUrl: '/Product-img/img_dress_1.jpeg' },
+        { id: 'flora-pink', color: 'Blush Pink', colorHex: '#FFC0CB', imageUrl: '/Product-img/img_dress_2.jpeg' },
+      ],
+      reviews: [],
+    },
+    {
+      id: 'city-chic-blazer-dress',
+      name: 'City Chic Blazer Dress',
+      category: 'Dresses',
+      price: 150,
+      description: 'A sophisticated blazer dress that combines power and style. Perfect for the modern woman on the go.',
+      isTrending: true,
+      isNew: false,
+      variants: [
+        { id: 'blazer-black', color: 'Classic Black', colorHex: '#000000', imageUrl: '/Product-img/img_dress_3.jpeg' },
+      ],
+      reviews: [],
+    },
+    {
+      id: 'sunset-slip-dress',
+      name: 'Sunset Slip Dress',
+      category: 'Dresses',
+      price: 95,
+      description: 'A simple yet elegant slip dress in a beautiful sunset orange hue. Made from luxurious satin.',
+      isTrending: false,
+      isNew: true,
+      variants: [
+        { id: 'slip-orange', color: 'Sunset Orange', colorHex: '#FD5E53', imageUrl: '/Product-img/img_dress_4.jpeg' },
+      ],
+      reviews: [],
+    },
+    {
+      id: 'denim-shirt-dress',
+      name: 'Denim Shirt Dress',
+      category: 'Dresses',
+      price: 85,
+      description: 'A casual and versatile denim shirt dress. Can be dressed up or down for any occasion.',
+      isTrending: false,
+      isNew: false,
+      variants: [
+        { id: 'denim-blue', color: 'Vintage Blue', colorHex: '#6082B6', imageUrl: '/Product-img/img_dress_5.jpeg' },
+      ],
+      reviews: [],
+    },
+    {
+      id: 'lace-midi-dress',
+      name: 'Lace Midi Dress',
+      category: 'Dresses',
+      price: 180,
+      description: 'An exquisite lace midi dress, perfect for weddings and formal events. Features intricate detailing.',
+      isTrending: false,
+      isNew: false,
+      variants: [
+        { id: 'lace-white', color: 'Ivory White', colorHex: '#FFFFF0', imageUrl: '/Product-img/img_dress_1.jpeg' },
+      ],
+      reviews: [],
     },
   ];
 

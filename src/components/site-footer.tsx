@@ -22,6 +22,7 @@ export function SiteFooter() {
                     <nav className="flex gap-6 text-sm font-medium">
                         <Link href="/chairs" className="text-muted-foreground hover:text-foreground">Chairs</Link>
                         <Link href="/sofas" className="text-muted-foreground hover:text-foreground">Sofas</Link>
+                        <Link href="/dresses" className="text-muted-foreground hover:text-foreground">Dresses</Link>
                         <Link href="/hair-accessories" className="text-muted-foreground hover:text-foreground">Lighting</Link>
                     </nav>
                 </div>
