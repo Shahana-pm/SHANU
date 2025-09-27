@@ -1,26 +1,37 @@
-'use server'; // This is now a Server Component
+'use client';
+
 import { notFound } from "next/navigation";
-import { getFirestore } from "firebase-admin/firestore";
+import { useDoc, useFirestore } from "@/firebase";
 import { Product } from "@/lib/types";
+import { doc } from "firebase/firestore";
+import { useMemo } from "react";
 import EditProductForm from "./edit-product-form";
-import { adminApp } from "@/firebase/admin";
 
-// Helper function to get data from Firestore on the server
-async function getProduct(id: string): Promise<Product | null> {
-  const db = getFirestore(adminApp);
-  const productDoc = await db.collection("products").doc(id).get();
-
-  if (!productDoc.exists) {
-    return null;
-  }
-  
-  // We manually add the id to the data object
-  return { id: productDoc.id, ...productDoc.data() } as Product;
+interface AdminProductEditPageProps {
+  params: {
+    id: string;
+  };
 }
 
-export default async function AdminProductEditPage({ params }: { params: { id: string } }) {
+export default function AdminProductEditPage({ params }: AdminProductEditPageProps) {
+  const firestore = useFirestore();
   const { id } = params;
-  const product = await getProduct(id);
+
+  const productRef = useMemo(() => {
+    if (!firestore) return null;
+    return doc(firestore, "products", id);
+  }, [firestore, id]);
+
+  const { data: product, loading } = useDoc<Product>(productRef);
+
+  if (loading) {
+    return (
+      <div>
+        <h1 className="font-headline text-3xl font-bold mb-8">Edit Product</h1>
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   if (!product) {
     return notFound();
