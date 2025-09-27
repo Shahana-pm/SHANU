@@ -61,28 +61,27 @@ export function AddProductForm() {
       isTrending: false,
     };
 
-    addDoc(productsCollection, newProductData)
-      .then((docRef) => {
-        toast({
-          title: "Product Added!",
-          description: `${values.name} has been created. Now add variants.`,
-        });
-        // Redirect to the new edit page to add variants
-        router.push(`/admin/products/${docRef.id}`);
-      })
-      .catch((serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: productsCollection.path,
-          operation: 'create',
-          requestResourceData: newProductData,
-        });
-        errorEmitter.emit('permission-error', permissionError);
-        toast({
-          variant: "destructive",
-          title: "Save Failed",
-          description: "Could not add product. Check permissions or console for details.",
-        });
+    try {
+      const docRef = await addDoc(productsCollection, newProductData);
+      toast({
+        title: "Product Added!",
+        description: `${values.name} has been created. Now add variants.`,
       });
+      // Redirect to the new edit page to add variants
+      router.push(`/admin/products/${docRef.id}`);
+    } catch (serverError) {
+      const permissionError = new FirestorePermissionError({
+        path: productsCollection.path,
+        operation: 'create',
+        requestResourceData: newProductData,
+      });
+      errorEmitter.emit('permission-error', permissionError);
+      toast({
+        variant: "destructive",
+        title: "Save Failed",
+        description: "Could not add product. Check permissions or console for details.",
+      });
+    }
   }
 
   return (
