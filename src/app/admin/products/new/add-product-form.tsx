@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useRouter } from "next/navigation";
@@ -70,6 +71,7 @@ export function AddProductForm() {
       // Redirect to the new edit page to add variants
       router.push(`/admin/products/${docRef.id}`);
     } catch (serverError) {
+      console.error(serverError)
       const permissionError = new FirestorePermissionError({
         path: productsCollection.path,
         operation: 'create',

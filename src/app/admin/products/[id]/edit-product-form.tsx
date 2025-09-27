@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useRouter } from "next/navigation";
@@ -20,12 +21,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Product, ProductVariant, ProductReview } from "@/lib/types";
 import { useFirestore } from "@/firebase";
-import { doc, writeBatch, collection } from "firebase/firestore";
+import { doc, writeBatch, collection, serverTimestamp } from "firebase/firestore";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 
 const variantSchema = z.object({
@@ -40,6 +42,8 @@ const formSchema = z.object({
   category: z.string().min(1, "Category is required"),
   price: z.coerce.number().min(0, "Price must be a positive number"),
   description: z.string().min(1, "Description is required"),
+  isNew: z.boolean(),
+  isTrending: z.boolean(),
   variants: z.array(variantSchema),
 });
 
@@ -61,6 +65,8 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
       category: product?.category || "",
       price: product?.price || 0,
       description: product?.description || "",
+      isNew: product?.isNew || false,
+      isTrending: product?.isTrending || false,
       variants: variants || [],
     },
   });
@@ -80,52 +86,48 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
       return;
     }
 
-    const batch = writeBatch(firestore);
-    const productRef = doc(firestore, "products", product.id);
+    try {
+      const batch = writeBatch(firestore);
+      const productRef = doc(firestore, "products", product.id);
 
-    // Exclude variants from the main product data
-    const { variants, ...productData } = values;
-    batch.update(productRef, productData);
-
-    // Handle variants subcollection
-    values.variants.forEach(variant => {
-      // If variant has an ID, it exists. If not, it's new.
-      const variantRef = variant.id
-        ? doc(firestore, "products", product.id, "variants", variant.id)
-        : doc(collection(firestore, "products", product.id, "variants"));
+      const { variants, ...productData } = values;
+      batch.update(productRef, productData);
       
-      batch.set(variantRef, {
-        color: variant.color,
-        colorHex: variant.colorHex,
-        imageIds: variant.imageIds
-      });
-    });
-
-    // TODO: Handle variant deletion. For now, we only add/update.
-
-    batch.commit()
-      .then(() => {
-        toast({
-          title: "Product Saved!",
-          description: `${values.name} has been updated.`,
-        });
-        router.push("/admin/products");
-        router.refresh(); // This helps in re-fetching the updated list
-      })
-      .catch((serverError: any) => {
-        console.error("Error saving product: ", serverError);
-        const permissionError = new FirestorePermissionError({
-          path: productRef.path,
-          operation: 'update',
-          requestResourceData: values,
-        });
-        errorEmitter.emit('permission-error', permissionError);
-        toast({
-          variant: "destructive",
-          title: "Save Failed",
-          description: "Could not save product. Check permissions or console for details.",
+      values.variants.forEach(variant => {
+        const variantRef = variant.id
+          ? doc(firestore, "products", product.id, "variants", variant.id)
+          : doc(collection(firestore, "products", product.id, "variants"));
+        
+        batch.set(variantRef, {
+          color: variant.color,
+          colorHex: variant.colorHex,
+          imageIds: variant.imageIds
         });
       });
+
+      await batch.commit();
+
+      toast({
+        title: "Product Saved!",
+        description: `${values.name} has been updated.`,
+      });
+      router.push("/admin/products");
+      router.refresh();
+
+    } catch (serverError) {
+      console.error("Error saving product: ", serverError);
+      const permissionError = new FirestorePermissionError({
+        path: `/products/${product.id}`,
+        operation: 'update',
+        requestResourceData: values,
+      });
+      errorEmitter.emit('permission-error', permissionError);
+      toast({
+        variant: "destructive",
+        title: "Save Failed",
+        description: "Could not save product. Check permissions or console for details.",
+      });
+    }
   }
 
   return (
@@ -140,6 +142,42 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
                     <FormField control={form.control} name="category" render={({ field }) => (<FormItem><FormLabel>Category</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField control={form.control} name="price" render={({ field }) => (<FormItem><FormLabel>Price</FormLabel><FormControl><Input type="number" step="0.01" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>Description</FormLabel><FormControl><Textarea rows={5} {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <div className="flex items-center space-x-8">
+                      <FormField
+                        control={form.control}
+                        name="isNew"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                            <div className="space-y-0.5 mr-4">
+                              <FormLabel>New Collection</FormLabel>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="isTrending"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                            <div className="space-y-0.5 mr-4">
+                              <FormLabel>Trending</FormLabel>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                 </CardContent>
             </Card>
 
