@@ -24,6 +24,8 @@ import { Product } from "@/lib/types";
 import { collection, deleteDoc, doc } from "firebase/firestore";
 import { useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 
 export default function AdminProductsPage() {
@@ -37,20 +39,23 @@ export default function AdminProductsPage() {
     if (!firestore) return;
     if (!confirm(`Are you sure you want to delete "${productName}"?`)) return;
 
-    try {
-      await deleteDoc(doc(firestore, "products", productId));
-      toast({
-        title: "Product Deleted",
-        description: `"${productName}" has been removed.`,
+    const docRef = doc(firestore, "products", productId);
+
+    deleteDoc(docRef)
+      .then(() => {
+        toast({
+          title: "Product Deleted",
+          description: `"${productName}" has been removed.`,
+        });
+      })
+      .catch((serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'delete',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        console.error("Error deleting product:", serverError);
       });
-    } catch (error: any) {
-      console.error("Error deleting product:", error);
-      toast({
-        variant: "destructive",
-        title: "Deletion Failed",
-        description: error.message || "Could not delete the product.",
-      });
-    }
   }
 
   return (

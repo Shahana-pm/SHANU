@@ -20,6 +20,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Product } from "@/lib/types";
 import { useFirestore } from "@/firebase";
 import { doc, updateDoc } from "firebase/firestore";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -44,32 +46,35 @@ export default function EditProductForm({ product }: { product: Product }) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!firestore) {
+    if (!firestore || !product?.id) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Firestore is not available.",
+        description: "Firestore is not available or product ID is missing.",
       });
       return;
     }
-    try {
-      const productRef = doc(firestore, "products", product.id);
-      await updateDoc(productRef, values);
-      
-      toast({
-        title: "Product Saved!",
-        description: `${values.name} has been updated.`,
+
+    const productRef = doc(firestore, "products", product.id);
+    
+    updateDoc(productRef, values)
+      .then(() => {
+        toast({
+          title: "Product Saved!",
+          description: `${values.name} has been updated.`,
+        });
+        router.push("/admin/products");
+        router.refresh();
+      })
+      .catch((serverError: any) => {
+        const permissionError = new FirestorePermissionError({
+          path: productRef.path,
+          operation: 'update',
+          requestResourceData: values,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        console.error("Error updating product:", serverError); // Keep for debugging
       });
-      router.push("/admin/products");
-      router.refresh();
-    } catch (error) {
-      console.error("Error updating product:", error);
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "Could not save the product. Please try again.",
-      });
-    }
   }
 
   return (

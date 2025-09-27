@@ -18,6 +18,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useFirestore } from "@/firebase";
 import { addDoc, collection } from "firebase/firestore";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -50,30 +52,34 @@ export function AddProductForm() {
       });
       return;
     }
-    try {
-      // Add new product with some default empty values for variants and reviews
-      await addDoc(collection(firestore, "products"), {
-        ...values,
-        isNew: true,
-        isTrending: false,
-        variants: [],
-        reviews: [],
+
+    const productsCollection = collection(firestore, "products");
+    const newProductData = {
+      ...values,
+      isNew: true,
+      isTrending: false,
+      variants: [],
+      reviews: [],
+    };
+    
+    addDoc(productsCollection, newProductData)
+      .then(() => {
+        toast({
+          title: "Product Added!",
+          description: `${values.name} has been created.`,
+        });
+        router.push("/admin/products");
+        router.refresh();
+      })
+      .catch((serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: productsCollection.path,
+          operation: 'create',
+          requestResourceData: newProductData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        console.error("Error adding product:", serverError);
       });
-      
-      toast({
-        title: "Product Added!",
-        description: `${values.name} has been created.`,
-      });
-      router.push("/admin/products");
-      router.refresh();
-    } catch (error) {
-      console.error("Error adding product:", error);
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "Could not save the product. Please try again.",
-      });
-    }
   }
 
   return (
