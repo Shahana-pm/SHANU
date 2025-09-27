@@ -18,6 +18,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Product } from "@/lib/types";
+import { useFirestore } from "@/firebase";
+import { doc, updateDoc } from "firebase/firestore";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -29,6 +31,7 @@ const formSchema = z.object({
 export default function EditProductForm({ product }: { product: Product }) {
   const router = useRouter();
   const { toast } = useToast();
+  const firestore = useFirestore();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -40,14 +43,33 @@ export default function EditProductForm({ product }: { product: Product }) {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // In a real app, you would save this to your database.
-    console.log("Updated product values:", values);
-    toast({
-      title: "Product Saved!",
-      description: `${values.name} has been updated.`,
-    });
-    router.push("/admin/products");
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!firestore) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Firestore is not available.",
+      });
+      return;
+    }
+    try {
+      const productRef = doc(firestore, "products", product.id);
+      await updateDoc(productRef, values);
+      
+      toast({
+        title: "Product Saved!",
+        description: `${values.name} has been updated.`,
+      });
+      router.push("/admin/products");
+      router.refresh();
+    } catch (error) {
+      console.error("Error updating product:", error);
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "Could not save the product. Please try again.",
+      });
+    }
   }
 
   return (

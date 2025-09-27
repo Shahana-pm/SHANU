@@ -10,7 +10,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { products } from "@/lib/data";
 import { PlusCircle, MoreHorizontal } from "lucide-react";
 import {
     DropdownMenu,
@@ -20,10 +19,28 @@ import {
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useFirestore } from "@/firebase";
+import { Product } from "@/lib/types";
+import { collection, getDocs } from "firebase/firestore";
+import { useEffect, useState } from "react";
+
 
 export default function AdminProductsPage() {
-  const router = useRouter();
+  const [products, setProducts] = useState<Product[]>([]);
+  const firestore = useFirestore();
+
+  useEffect(() => {
+    if (!firestore) return;
+    const fetchProducts = async () => {
+      const productsCollection = collection(firestore, "products");
+      const productSnapshot = await getDocs(productsCollection);
+      const productList = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+      setProducts(productList);
+    };
+
+    fetchProducts();
+  }, [firestore]);
+
 
   return (
     <div>

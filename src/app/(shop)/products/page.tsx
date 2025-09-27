@@ -1,7 +1,27 @@
+'use client';
 import { ProductCard } from "@/components/product-card";
-import { products } from "@/lib/data";
+import { useFirestore } from "@/firebase";
+import { Product } from "@/lib/types";
+import { collection, getDocs } from "firebase/firestore";
+import { useEffect, useState } from "react";
 
 export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const firestore = useFirestore();
+
+  useEffect(() => {
+    if (!firestore) return;
+    const fetchProducts = async () => {
+      const productsCollection = collection(firestore, "products");
+      const productSnapshot = await getDocs(productsCollection);
+      const productList = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+      setProducts(productList);
+    };
+
+    fetchProducts();
+  }, [firestore]);
+
+
   return (
     <div className="container py-12">
       <div className="mb-10 text-center">

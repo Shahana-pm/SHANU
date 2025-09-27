@@ -1,13 +1,39 @@
+'use client';
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
-import { products } from "@/lib/data";
 import { ArrowRight } from "lucide-react";
+import { useFirestore } from "@/firebase";
+import { Product } from "@/lib/types";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { useEffect, useState } from "react";
 
 export default function HomePage() {
-  const trendingProducts = products.filter(p => p.isTrending).slice(0, 4);
-  const newCollection = products.filter(p => p.isNew).slice(0, 4);
+  const [trendingProducts, setTrendingProducts] = useState<Product[]>([]);
+  const [newCollection, setNewCollection] = useState<Product[]>([]);
+  const firestore = useFirestore();
+
+  useEffect(() => {
+    if (!firestore) return;
+    
+    const fetchProducts = async () => {
+      const productsRef = collection(firestore, 'products');
+
+      // Fetch trending products
+      const trendingQuery = query(productsRef, where('isTrending', '==', true));
+      const trendingSnapshot = await getDocs(trendingQuery);
+      setTrendingProducts(trendingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)).slice(0, 4));
+
+      // Fetch new collection
+      const newQuery = query(productsRef, where('isNew', '==', true));
+      const newSnapshot = await getDocs(newQuery);
+      setNewCollection(newSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)).slice(0, 4));
+    };
+
+    fetchProducts();
+  }, [firestore]);
+
 
   return (
     <>
