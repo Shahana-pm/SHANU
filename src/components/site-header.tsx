@@ -6,6 +6,7 @@ import { ShoppingBag, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
 import { useEffect, useState } from "react";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export function SiteHeader() {
   const { state } = useCart();
@@ -20,17 +21,20 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container grid h-16 grid-cols-3 items-center">
-        <nav className="flex items-center space-x-4 text-sm font-medium">
-          <Link href="/hair-accessories" className="transition-colors hover:text-foreground/80">
-            Hair Accessories
-          </Link>
-          <Link href="/dresses" className="transition-colors hover:text-foreground/80">
-            Dresses
-          </Link>
-          <Link href="/kids" className="transition-colors hover:text-foreground/80">
-            Kids
-          </Link>
-        </nav>
+        <div className="flex items-center gap-2">
+          <SidebarTrigger className="md:hidden"/>
+          <nav className="hidden md:flex items-center space-x-4 text-sm font-medium">
+            <Link href="/hair-accessories" className="transition-colors hover:text-foreground/80">
+              Hair Accessories
+            </Link>
+            <Link href="/dresses" className="transition-colors hover:text-foreground/80">
+              Dresses
+            </Link>
+            <Link href="/kids" className="transition-colors hover:text-foreground/80">
+              Kids
+            </Link>
+          </nav>
+        </div>
         <div className="flex justify-center">
             <Link href="/" className="text-2xl font-bold font-headline">
                 IQRAH SHANU
@@ -38,10 +42,10 @@ export function SiteHeader() {
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/cart">
+            <Link href="/cart" className="relative">
               <ShoppingBag className="h-5 w-5" />
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                <span className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                   {itemCount}
                 </span>
               )}
