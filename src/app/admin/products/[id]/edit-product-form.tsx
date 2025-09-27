@@ -12,6 +12,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,11 +20,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Product, ProductVariant, ProductReview } from "@/lib/types";
 import { useFirestore } from "@/firebase";
-import { doc, updateDoc, writeBatch } from "firebase/firestore";
+import { doc, writeBatch, collection } from "firebase/firestore";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { PlusCircle, Trash2 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 const variantSchema = z.object({
   id: z.string().optional(),
@@ -80,17 +83,25 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
     const batch = writeBatch(firestore);
     const productRef = doc(firestore, "products", product.id);
 
+    // Exclude variants from the main product data
     const { variants, ...productData } = values;
     batch.update(productRef, productData);
 
-    variants.forEach(variant => {
-      const variantRef = doc(firestore, "products", product.id, "variants", variant.id || doc(collection(firestore, '_')).id);
+    // Handle variants subcollection
+    values.variants.forEach(variant => {
+      // If variant has an ID, it exists. If not, it's new.
+      const variantRef = variant.id
+        ? doc(firestore, "products", product.id, "variants", variant.id)
+        : doc(collection(firestore, "products", product.id, "variants"));
+      
       batch.set(variantRef, {
         color: variant.color,
         colorHex: variant.colorHex,
         imageIds: variant.imageIds
       });
     });
+
+    // TODO: Handle variant deletion. For now, we only add/update.
 
     batch.commit()
       .then(() => {
@@ -99,15 +110,21 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
           description: `${values.name} has been updated.`,
         });
         router.push("/admin/products");
-        router.refresh();
+        router.refresh(); // This helps in re-fetching the updated list
       })
       .catch((serverError: any) => {
+        console.error("Error saving product: ", serverError);
         const permissionError = new FirestorePermissionError({
           path: productRef.path,
           operation: 'update',
           requestResourceData: values,
         });
         errorEmitter.emit('permission-error', permissionError);
+        toast({
+          variant: "destructive",
+          title: "Save Failed",
+          description: "Could not save product. Check permissions or console for details.",
+        });
       });
   }
 
@@ -133,14 +150,40 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
                 </CardHeader>
                 <CardContent className="space-y-6">
                     {fields.map((field, index) => (
-                        <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
+                        <div key={field.id} className="p-4 border rounded-lg space-y-4 relative bg-muted/20">
                             <FormField control={form.control} name={`variants.${index}.color`} render={({ field }) => (<FormItem><FormLabel>Color Name</FormLabel><FormControl><Input placeholder="e.g., Midnight Black" {...field} /></FormControl><FormMessage /></FormItem>)} />
                             <FormField control={form.control} name={`variants.${index}.colorHex`} render={({ field }) => (<FormItem><FormLabel>Color Hex</FormLabel><FormControl><Input placeholder="#000000" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                            <FormField control={form.control} name={`variants.${index}.imageIds.0`} render={({ field }) => (<FormItem><FormLabel>Image ID</FormLabel><FormControl><Input placeholder="e.g., img_chair_1" {...field} /></FormControl><FormDescription>Enter one image ID from placeholder-images.json.</FormDescription><FormMessage /></FormItem>)} />
+                            
+                            <FormField
+                              control={form.control}
+                              name={`variants.${index}.imageIds.0`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Primary Image</FormLabel>
+                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select an image" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {PlaceHolderImages.map(img => (
+                                        <SelectItem key={img.id} value={img.id}>
+                                          {img.description} ({img.id})
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormDescription>This is the main image for this product variant.</FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
                             <Button type="button" variant="destructive" size="icon" className="absolute top-4 right-4" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
                         </div>
                     ))}
-                     <Button type="button" variant="outline" onClick={() => append({ color: '', colorHex: '#', imageIds: [''] })}>
+                     <Button type="button" variant="outline" onClick={() => append({ color: '', colorHex: '#000000', imageIds: [''] })}>
                         <PlusCircle className="mr-2 h-4 w-4"/> Add Variant
                     </Button>
                 </CardContent>

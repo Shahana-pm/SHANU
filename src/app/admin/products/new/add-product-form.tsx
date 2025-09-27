@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useFirestore } from "@/firebase";
-import { addDoc, collection, writeBatch, doc } from "firebase/firestore";
+import { addDoc, collection } from "firebase/firestore";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 
@@ -54,7 +54,6 @@ export function AddProductForm() {
     }
 
     const productsCollection = collection(firestore, "products");
-    const newProductRef = doc(productsCollection);
 
     const newProductData = {
       ...values,
@@ -66,10 +65,10 @@ export function AddProductForm() {
       .then((docRef) => {
         toast({
           title: "Product Added!",
-          description: `${values.name} has been created.`,
+          description: `${values.name} has been created. Now add variants.`,
         });
+        // Redirect to the new edit page to add variants
         router.push(`/admin/products/${docRef.id}`);
-        router.refresh();
       })
       .catch((serverError) => {
         const permissionError = new FirestorePermissionError({
@@ -78,6 +77,11 @@ export function AddProductForm() {
           requestResourceData: newProductData,
         });
         errorEmitter.emit('permission-error', permissionError);
+        toast({
+          variant: "destructive",
+          title: "Save Failed",
+          description: "Could not add product. Check permissions or console for details.",
+        });
       });
   }
 
@@ -91,7 +95,7 @@ export function AddProductForm() {
 
             <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-                <Button type="submit">Save Product</Button>
+                <Button type="submit">Save and Add Variants</Button>
             </div>
         </form>
     </Form>
