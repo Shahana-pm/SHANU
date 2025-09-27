@@ -214,11 +214,11 @@ export default function EditProductForm({ product, variants, reviews }: EditProd
                                   <FormLabel>Primary Image</FormLabel>
                                   <FormControl>
                                     <ImageUploader 
-                                      onUploadSuccess={(url) => field.onChange(url)}
+                                      onImageSelect={(url) => field.onChange(url)}
                                       initialImageUrl={field.value}
                                     />
                                   </FormControl>
-                                  <FormDescription>Upload the main image for this product variant.</FormDescription>
+                                  <FormDescription>Select an image you've uploaded to the 'product-images' folder in Firebase Storage.</FormDescription>
                                   <FormMessage />
                                 </FormItem>
                               )}

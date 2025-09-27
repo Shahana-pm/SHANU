@@ -213,11 +213,11 @@ export function AddProductDialog() {
                                                 <FormLabel>Primary Image</FormLabel>
                                                 <FormControl>
                                                     <ImageUploader 
-                                                        onUploadSuccess={(url) => field.onChange(url)}
+                                                        onImageSelect={(url) => field.onChange(url)}
                                                         initialImageUrl={field.value}
                                                     />
                                                 </FormControl>
-                                                <FormDescription>Upload the main image for this product variant.</FormDescription>
+                                                <FormDescription>Select an image from Firebase Storage.</FormDescription>
                                                 <FormMessage />
                                                 </FormItem>
                                             )}
