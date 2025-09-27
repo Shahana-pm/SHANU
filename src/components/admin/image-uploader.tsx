@@ -83,7 +83,7 @@ export function ImageUploader({ onImageSelect, initialImageUrl }: ImagePickerPro
       ) : (
         <Select onValueChange={handleSelectImage} value={selectedImageUrl || ""}>
           <SelectTrigger>
-            <SelectValue placeholder="Select an image from /public/product-images" />
+            <SelectValue placeholder="Select an image from /public/Product-img" />
           </SelectTrigger>
           <SelectContent>
             {imageList.length > 0 ? (
@@ -94,7 +94,7 @@ export function ImageUploader({ onImageSelect, initialImageUrl }: ImagePickerPro
                 ))
             ) : (
                 <div className="p-4 text-sm text-center text-muted-foreground">
-                    No images found in the 'public/product-images' folder. Please add your images there.
+                    No images found in the 'public/Product-img' folder. Please add your images there.
                 </div>
             )}
           </SelectContent>
