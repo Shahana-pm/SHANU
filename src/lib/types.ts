@@ -20,10 +20,9 @@ export type Product = {
   category: string;
   price: number;
   description: string;
-  variants: ProductVariant[];
-  reviews: ProductReview[];
   isTrending: boolean;
   isNew: boolean;
+  // Variants and reviews will be handled as sub-collections
 };
 
 export type CartItem = {

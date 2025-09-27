@@ -1,37 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
-import type { Product } from "@/lib/types";
+import type { Product, ProductVariant } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { cn } from "@/lib/utils";
 
 interface ProductGalleryProps {
   product: Product;
+  variants: ProductVariant[];
 }
 
-export function ProductGallery({ product }: ProductGalleryProps) {
+export function ProductGallery({ product, variants }: ProductGalleryProps) {
   const [selectedVariantId, setSelectedVariantId] = useState(
-    product.variants[0].id
+    variants[0]?.id
   );
 
-  const selectedVariant = product.variants.find(
-    (v) => v.id === selectedVariantId
-  );
-  const images =
+  const selectedVariant = useMemo(() => variants.find(v => v.id === selectedVariantId), [variants, selectedVariantId]);
+
+  const images = useMemo(() => 
     selectedVariant?.imageIds
       .map((id) => PlaceHolderImages.find((img) => img.id === id))
-      .filter(Boolean) ?? [];
+      .filter(Boolean) ?? []
+  , [selectedVariant]);
 
   const [mainImage, setMainImage] = useState(images[0]);
 
   const handleVariantChange = (variantId: string) => {
     setSelectedVariantId(variantId);
-    const newVariant = product.variants.find((v) => v.id === variantId);
+    const newVariant = variants.find((v) => v.id === variantId);
     const newImages = newVariant?.imageIds
       .map((id) => PlaceHolderImages.find((img) => img.id === id))
       .filter(Boolean) ?? [];
     setMainImage(newImages[0]);
+  }
+
+  if (!variants || variants.length === 0) {
+    return (
+      <div className="aspect-[3/4] relative w-full overflow-hidden rounded-lg bg-secondary">
+          <Image
+              src="https://placehold.co/800x1000"
+              alt="Placeholder Image"
+              fill
+              className="object-cover"
+            />
+      </div>
+    )
   }
 
   return (

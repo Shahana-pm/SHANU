@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useFirestore } from "@/firebase";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, writeBatch, doc } from "firebase/firestore";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 
@@ -54,21 +54,21 @@ export function AddProductForm() {
     }
 
     const productsCollection = collection(firestore, "products");
+    const newProductRef = doc(productsCollection);
+
     const newProductData = {
       ...values,
       isNew: true,
       isTrending: false,
-      variants: [],
-      reviews: [],
     };
     
     addDoc(productsCollection, newProductData)
-      .then(() => {
+      .then((docRef) => {
         toast({
           title: "Product Added!",
           description: `${values.name} has been created.`,
         });
-        router.push("/admin/products");
+        router.push(`/admin/products/${docRef.id}`);
         router.refresh();
       })
       .catch((serverError) => {
