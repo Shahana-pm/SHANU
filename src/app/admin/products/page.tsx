@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -10,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { PlusCircle, MoreHorizontal, ImageIcon } from "lucide-react";
+import { MoreHorizontal, ImageIcon } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -29,6 +28,7 @@ import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AddProductDialog } from "./add-product-dialog";
 
 type ProductWithFirstVariant = Product & { firstVariantImageId?: string };
 
@@ -101,11 +101,7 @@ export default function AdminProductsPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="font-headline text-3xl font-bold">Products</h1>
-        <Button asChild>
-          <Link href="/admin/products/new">
-            <PlusCircle className="mr-2 h-4 w-4" /> Add Product
-          </Link>
-        </Button>
+        <AddProductDialog />
       </div>
       <div className="rounded-lg border">
         <Table>
