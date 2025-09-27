@@ -6,7 +6,7 @@ import { ProductCard } from "@/components/product-card";
 import { ArrowRight } from "lucide-react";
 import { useCollection, useFirestore } from "@/firebase";
 import { Product, ProductVariant } from "@/lib/types";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, limit } from "firebase/firestore";
 import { useMemo, useState, useEffect } from "react";
 
 type ProductWithFirstVariant = Product & { firstVariantImageId?: string };
@@ -22,7 +22,8 @@ function useProductVariantImages(products: Product[] | null) {
         const productsWithVariants = await Promise.all(
           products.map(async (product) => {
             const variantsRef = collection(firestore, 'products', product.id, 'variants');
-            const variantsSnap = await getDocs(variantsRef);
+            const q = query(variantsRef, limit(1));
+            const variantsSnap = await getDocs(q);
             if (!variantsSnap.empty) {
               const firstVariant = variantsSnap.docs[0].data() as ProductVariant;
               return { ...product, firstVariantImageId: firstVariant.imageIds[0] };
@@ -48,10 +49,10 @@ export default function HomePage() {
 
   const productsRef = useMemo(() => firestore ? collection(firestore, 'products') : null, [firestore]);
   
-  const trendingQuery = useMemo(() => productsRef ? query(productsRef, where('isTrending', '==', true)) : null, [productsRef]);
+  const trendingQuery = useMemo(() => productsRef ? query(productsRef, where('isTrending', '==', true), limit(4)) : null, [productsRef]);
   const { data: trendingProducts } = useCollection<Product>(trendingQuery);
   
-  const newQuery = useMemo(() => productsRef ? query(productsRef, where('isNew', '==', true)) : null, [productsRef]);
+  const newQuery = useMemo(() => productsRef ? query(productsRef, where('isNew', '==', true), limit(4)) : null, [productsRef]);
   const { data: newCollectionProducts } = useCollection<Product>(newQuery);
 
   const trendingProductsWithImages = useProductVariantImages(trendingProducts);
@@ -89,13 +90,13 @@ export default function HomePage() {
             </Button>
         </div>
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {trendingProductsWithImages?.slice(0, 4).map(product => (
+          {trendingProductsWithImages?.map(product => (
             <ProductCard key={product.id} product={product} variantImageId={product.firstVariantImageId} />
           ))}
         </div>
       </section>
 
-      <section className="bg-background">
+      <section className="bg-secondary/50">
         <div className="container py-16 md:py-24">
             <div className="flex items-center justify-between mb-8">
                 <h2 className="font-headline text-3xl font-bold md:text-4xl">New Collection</h2>
@@ -104,7 +105,7 @@ export default function HomePage() {
                 </Button>
             </div>
             <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {newCollectionWithImages?.slice(0, 4).map(product => (
+            {newCollectionWithImages?.map(product => (
                 <ProductCard key={product.id} product={product} variantImageId={product.firstVariantImageId} />
             ))}
             </div>

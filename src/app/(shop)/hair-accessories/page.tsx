@@ -2,7 +2,7 @@
 import { ProductCard } from "@/components/product-card";
 import { useCollection, useFirestore } from "@/firebase";
 import { Product, ProductVariant } from "@/lib/types";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, limit } from "firebase/firestore";
 import { useMemo, useState, useEffect } from "react";
 
 type ProductWithFirstVariant = Product & { firstVariantImageId?: string };
@@ -10,22 +10,24 @@ type ProductWithFirstVariant = Product & { firstVariantImageId?: string };
 export default function HairAccessoriesPage() {
   const firestore = useFirestore();
   const [productsWithImages, setProductsWithImages] = useState<ProductWithFirstVariant[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const productsQuery = useMemo(() => {
     if (!firestore) return null;
-    // Note: Ensure your category names match exactly what's in Firestore.
     return query(collection(firestore, "products"), where("category", "==", "Hair Accessories"));
   }, [firestore]);
 
-  const { data: products, loading } = useCollection<Product>(productsQuery);
+  const { data: products } = useCollection<Product>(productsQuery);
 
   useEffect(() => {
     const fetchVariants = async () => {
+      setLoading(true);
       if (products && firestore) {
         const productsWithVariants = await Promise.all(
           products.map(async (product) => {
             const variantsRef = collection(firestore, 'products', product.id, 'variants');
-            const variantsSnap = await getDocs(variantsRef);
+            const q = query(variantsRef, limit(1));
+            const variantsSnap = await getDocs(q);
             if (!variantsSnap.empty) {
               const firstVariant = variantsSnap.docs[0].data() as ProductVariant;
               return { ...product, firstVariantImageId: firstVariant.imageIds[0] };
@@ -34,7 +36,10 @@ export default function HairAccessoriesPage() {
           })
         );
         setProductsWithImages(productsWithVariants);
+      } else if (products) {
+        setProductsWithImages(products);
       }
+      setLoading(false);
     };
 
     fetchVariants();
@@ -49,7 +54,18 @@ export default function HairAccessoriesPage() {
         </p>
       </div>
 
-      {loading ? <p>Loading...</p> : (
+      {loading ? (
+        <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="space-y-2">
+              <div className="aspect-[4/5] w-full bg-muted animate-pulse rounded-lg"/>
+              <div className="h-4 w-1/4 bg-muted animate-pulse rounded"/>
+              <div className="h-6 w-3/4 bg-muted animate-pulse rounded"/>
+              <div className="h-6 w-1/3 bg-muted animate-pulse rounded"/>
+            </div>
+          ))}
+        </div>
+      ) : (
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {productsWithImages.map((product) => (
             <ProductCard key={product.id} product={product} variantImageId={product.firstVariantImageId} />

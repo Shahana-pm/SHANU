@@ -2,7 +2,7 @@
 import { ProductCard } from "@/components/product-card";
 import { useCollection, useFirestore } from "@/firebase";
 import { Product, ProductVariant } from "@/lib/types";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, limit } from "firebase/firestore";
 import { useMemo, useEffect, useState } from "react";
 
 type ProductWithFirstVariant = Product & { firstVariantImageId?: string };
@@ -10,17 +10,20 @@ type ProductWithFirstVariant = Product & { firstVariantImageId?: string };
 export default function ProductsPage() {
   const firestore = useFirestore();
   const [productsWithImages, setProductsWithImages] = useState<ProductWithFirstVariant[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const productsCollection = useMemo(() => firestore ? collection(firestore, "products") : null, [firestore]);
-  const { data: products, loading } = useCollection<Product>(productsCollection);
+  const { data: products } = useCollection<Product>(productsCollection);
 
   useEffect(() => {
     const fetchVariants = async () => {
+      setLoading(true);
       if (products && firestore) {
         const productsWithVariants = await Promise.all(
           products.map(async (product) => {
             const variantsRef = collection(firestore, 'products', product.id, 'variants');
-            const variantsSnap = await getDocs(variantsRef);
+            const q = query(variantsRef, limit(1));
+            const variantsSnap = await getDocs(q);
             if (!variantsSnap.empty) {
               const firstVariant = variantsSnap.docs[0].data() as ProductVariant;
               return { ...product, firstVariantImageId: firstVariant.imageIds[0] };
@@ -29,7 +32,10 @@ export default function ProductsPage() {
           })
         );
         setProductsWithImages(productsWithVariants);
+      } else if (products) {
+        setProductsWithImages(products)
       }
+      setLoading(false);
     };
 
     fetchVariants();
@@ -44,7 +50,16 @@ export default function ProductsPage() {
         </p>
       </div>
         {loading ? (
-            <p>Loading products...</p>
+            <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="aspect-[4/5] w-full bg-muted animate-pulse rounded-lg"/>
+                  <div className="h-4 w-1/4 bg-muted animate-pulse rounded"/>
+                  <div className="h-6 w-3/4 bg-muted animate-pulse rounded"/>
+                  <div className="h-6 w-1/3 bg-muted animate-pulse rounded"/>
+                </div>
+              ))}
+            </div>
         ) : (
             <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {productsWithImages.map((product) => (
