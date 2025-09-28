@@ -40,8 +40,8 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if(subtotal > 0) {
-      const payeeName = "SHANU PM".replace(/\s/g, '%20');
-      const upiId = "shanupm6181@oksbi";
+      const payeeName = "IQRAH SHANU".replace(/\s/g, '%20');
+      const upiId = "safiyavm790@oksbi";
       const link = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${subtotal.toFixed(2)}&cu=INR`;
       setUpiLink(link);
     }

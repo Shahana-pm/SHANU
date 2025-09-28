@@ -1,7 +1,5 @@
-
 'use client';
 
-import { useParams } from 'next/navigation';
 import { useDoc, useFirestore, useCollection } from '@/firebase';
 import { Product, ProductVariant, ProductReview } from '@/lib/types';
 import { doc, collection } from 'firebase/firestore';
