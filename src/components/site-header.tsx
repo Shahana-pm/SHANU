@@ -79,18 +79,6 @@ export function SiteHeader() {
         <div className="flex-1 items-center hidden md:flex">
             <nav className="flex items-center space-x-6 text-sm font-medium">
                 <Link
-                href="/chairs"
-                className="transition-colors hover:text-foreground/80"
-                >
-                Chairs
-                </Link>
-                <Link
-                href="/sofas"
-                className="transition-colors hover:text-foreground/80"
-                >
-                Sofas
-                </Link>
-                <Link
                 href="/dresses"
                 className="transition-colors hover:text-foreground/80"
                 >
@@ -100,7 +88,13 @@ export function SiteHeader() {
                 href="/hair-accessories"
                 className="transition-colors hover:text-foreground/80"
                 >
-                Lighting
+                Hair Accessories
+                </Link>
+                <Link
+                href="/kids"
+                className="transition-colors hover:text-foreground/80"
+                >
+                Kids
                 </Link>
             </nav>
         </div>

@@ -20,10 +20,9 @@ export function SiteFooter() {
                         <p className="text-sm text-muted-foreground">Smart & Stylish Shopping</p>
                     </div>
                     <nav className="flex gap-6 text-sm font-medium">
-                        <Link href="/chairs" className="text-muted-foreground hover:text-foreground">Chairs</Link>
-                        <Link href="/sofas" className="text-muted-foreground hover:text-foreground">Sofas</Link>
                         <Link href="/dresses" className="text-muted-foreground hover:text-foreground">Dresses</Link>
-                        <Link href="/hair-accessories" className="text-muted-foreground hover:text-foreground">Lighting</Link>
+                        <Link href="/hair-accessories" className="text-muted-foreground hover:text-foreground">Hair Accessories</Link>
+                        <Link href="/kids" className="text-muted-foreground hover:text-foreground">Kids</Link>
                     </nav>
                 </div>
                 <div className="mt-12 pt-8 border-t flex justify-between items-center text-sm text-muted-foreground">
