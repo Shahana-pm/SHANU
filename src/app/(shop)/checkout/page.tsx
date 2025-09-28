@@ -103,7 +103,6 @@ export default function CheckoutPage() {
                         data-ai-hint="QR code"
                     />
                 </div>
-                <p className="font-bold text-lg">Account: SHANU PM</p>
                 <p className="text-sm text-muted-foreground">After payment, your order will be processed and shipped.</p>
             </div>
         </div>
