@@ -374,10 +374,9 @@ export const seedDatabaseFlow = ai.defineFlow(
   async () => {
     try {
       if (!admin.apps.length) {
-        const serviceAccount = getServiceAccount();
-        admin.initializeApp({
-          credential: serviceAccount ? admin.credential.cert(serviceAccount as admin.ServiceAccount) : undefined,
-        });
+        // Correctly initialize without a service account file
+        // The SDK will use Application Default Credentials
+        admin.initializeApp();
       }
       const db = getFirestore(admin.app());
 
@@ -427,3 +426,5 @@ export const seedDatabaseFlow = ai.defineFlow(
     }
   }
 );
+
+    
