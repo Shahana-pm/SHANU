@@ -13,8 +13,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/hooks/use-cart";
+import QRCode from "react-qr-code";
+import { useEffect, useState } from "react";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -28,6 +30,24 @@ const formSchema = z.object({
 
 export default function CheckoutPage() {
   const { toast } = useToast();
+  const { state: cartState } = useCart();
+  const [upiLink, setUpiLink] = useState('');
+
+  const subtotal = cartState.items.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
+
+  useEffect(() => {
+    if(subtotal > 0) {
+      const payeeName = "SHANU PM".replace(/\s/g, '%20');
+      const upiId = "shanupm6181@oksbi";
+      const link = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${subtotal.toFixed(2)}&cu=INR`;
+      setUpiLink(link);
+    }
+  }, [subtotal])
+
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -94,14 +114,20 @@ export default function CheckoutPage() {
             <h2 className="font-headline text-2xl font-semibold border-b pb-2">Payment Method</h2>
             <div className="p-6 bg-secondary rounded-lg text-center space-y-4">
                 <p className="text-muted-foreground">Scan the QR code with your payment app to complete the purchase.</p>
-                <div className="relative aspect-square w-full max-w-xs mx-auto">
-                    <Image 
-                        src="/Payment/qr code.jpg"
-                        alt="Payment QR Code"
-                        fill
-                        className="rounded-md object-cover"
-                        data-ai-hint="QR code"
-                    />
+                <div className="bg-white p-4 rounded-md w-full max-w-xs mx-auto">
+                  {upiLink ? (
+                      <QRCode
+                          value={upiLink}
+                          size={256}
+                          style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                          viewBox={`0 0 256 256`}
+                      />
+                  ) : (
+                    <div className="aspect-square w-full bg-gray-200 animate-pulse rounded-md" />
+                  )}
+                </div>
+                <div className="font-bold text-lg">
+                  Total: Rs{subtotal.toFixed(2)}
                 </div>
                 <p className="text-sm text-muted-foreground">After payment, your order will be processed and shipped.</p>
             </div>
