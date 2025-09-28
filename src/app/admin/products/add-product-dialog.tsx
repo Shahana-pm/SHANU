@@ -106,10 +106,7 @@ export function AddProductDialog() {
 
     try {
         await batch.commit();
-        toast({
-            title: "Product Created!",
-            description: `${values.name} has been added to the store.`,
-        });
+        alert(`Product "${values.name}" has been saved successfully!`);
         form.reset();
         setOpen(false);
     } catch (serverError: any) {
