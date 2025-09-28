@@ -37,11 +37,15 @@ export default function SofasPage() {
             </div>
           ))}
         </div>
-      ) : (
+      ) : productsWithImages.length > 0 ? (
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {productsWithImages.map((product) => (
             <ProductCard key={product.id} product={product} variantImageUrl={product.firstVariantImageUrl} />
           ))}
+        </div>
+      ) : (
+        <div className="text-center py-16 border border-dashed rounded-lg">
+          <p className="text-muted-foreground">No products found in this category.</p>
         </div>
       )}
     </div>
