@@ -96,7 +96,7 @@ export default function CheckoutPage() {
                 <p className="text-muted-foreground">Scan the QR code with your payment app to complete the purchase.</p>
                 <div className="relative aspect-square w-full max-w-xs mx-auto">
                     <Image 
-                        src="/Product-img/payment-qr-code.png"
+                        src="/Payment/qr code.jpg"
                         alt="Payment QR Code"
                         fill
                         className="rounded-md object-cover"
