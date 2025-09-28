@@ -6,7 +6,7 @@ import { ProductInfo } from "@/components/product-info";
 import { useDoc, useFirestore, useCollection } from "@/firebase";
 import { Product, ProductVariant, ProductReview } from "@/lib/types";
 import { doc, collection } from "firebase/firestore";
-import { useMemo } from "react";
+import { useMemo, use } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 
@@ -36,9 +36,9 @@ function ProductPageSkeleton() {
 }
 
 
-export default function ProductPage({ params }: { params: { slug: string } }) {
+export default function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const firestore = useFirestore();
-  const { slug } = params;
+  const { slug } = use(params);
 
   const productRef = useMemo(() => {
     if (!firestore) return null;
