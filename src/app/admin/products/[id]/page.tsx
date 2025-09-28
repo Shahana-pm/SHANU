@@ -1,17 +1,17 @@
+
 'use client';
 
 import { useParams } from 'next/navigation';
 import { useDoc, useFirestore, useCollection } from '@/firebase';
 import { Product, ProductVariant, ProductReview } from '@/lib/types';
 import { doc, collection } from 'firebase/firestore';
-import { useMemo } from 'react';
+import { useMemo, use } from 'react';
 import EditProductForm from './edit-product-form';
 import { notFound } from 'next/navigation';
 
-export default function AdminProductEditPage() {
+export default function AdminProductEditPage({ params }: { params: Promise<{ id: string }> }) {
   const firestore = useFirestore();
-  const params = useParams();
-  const id = params.id as string;
+  const { id } = use(params);
 
   const productRef = useMemo(() => {
     if (!firestore || !id) return null;
