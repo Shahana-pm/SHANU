@@ -1,11 +1,14 @@
+
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useContext, useEffect } from "react";
 import type { Product, ProductVariant, ProductReview } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { Star } from "lucide-react";
+import { SelectedVariantContext, type SelectedVariantContextType } from "@/app/(shop)/products/[slug]/selected-variant-context.tsx";
+import { cn } from "@/lib/utils";
 
 interface ProductInfoProps {
   product: Product;
@@ -15,15 +18,24 @@ interface ProductInfoProps {
 
 export function ProductInfo({ product, variants, reviews }: ProductInfoProps) {
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariantId, setSelectedVariantId] = useState(
-    variants[0]?.id
-  );
+  const context = useContext(SelectedVariantContext);
+  if (!context) {
+    throw new Error("ProductInfo must be used within a SelectedVariantProvider");
+  }
+  const { selectedVariantId, setSelectedVariantId } = context;
+  
   const { dispatch } = useCart();
   const { toast } = useToast();
 
-  const selectedVariant = useMemo(() => variants.find(
-    (v) => v.id === selectedVariantId
-  )!, [variants, selectedVariantId]);
+  useEffect(() => {
+    if (!selectedVariantId && variants.length > 0) {
+      setSelectedVariantId(variants[0].id);
+    }
+  }, [selectedVariantId, variants, setSelectedVariantId]);
+
+  const selectedVariant = useMemo(() => {
+    return variants.find((v) => v.id === selectedVariantId);
+  }, [variants, selectedVariantId]);
 
   const handleAddToCart = () => {
     if (!selectedVariant) {
@@ -96,6 +108,21 @@ export function ProductInfo({ product, variants, reviews }: ProductInfoProps) {
       </div>
 
       <p className="text-3xl font-semibold">${product.price.toFixed(2)}</p>
+
+      <div>
+        <h3 className="text-sm font-medium text-foreground">Color: <span className="text-muted-foreground">{selectedVariant?.color}</span></h3>
+        <div className="flex items-center gap-2 mt-2">
+            {variants.map(variant => (
+                <button 
+                    key={variant.id}
+                    onClick={() => setSelectedVariantId(variant.id)}
+                    className={cn("h-8 w-8 rounded-full border-2 transition-transform transform hover:scale-110", selectedVariantId === variant.id ? "ring-2 ring-primary ring-offset-2" : "border-muted-foreground/50")}
+                    style={{backgroundColor: variant.colorHex}}
+                    aria-label={`Select color ${variant.color}`}
+                />
+            ))}
+        </div>
+      </div>
 
       <p className="text-muted-foreground leading-relaxed">
         {product.description}

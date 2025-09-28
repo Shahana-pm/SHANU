@@ -8,6 +8,7 @@ import { Product, ProductVariant, ProductReview } from "@/lib/types";
 import { doc, collection } from "firebase/firestore";
 import { useMemo, use } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SelectedVariantContext, SelectedVariantProvider } from "./selected-variant-context.tsx";
 
 
 function ProductPageSkeleton() {
@@ -15,7 +16,10 @@ function ProductPageSkeleton() {
     <div className="container py-8 md:py-12">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
         <div className="grid md:grid-cols-[80px_1fr] gap-4">
-            <div/>
+            <div className="flex md:flex-col gap-2">
+              <Skeleton className="h-20 w-20 rounded-md" />
+              <Skeleton className="h-20 w-20 rounded-md" />
+            </div>
             <Skeleton className="aspect-[3/4] w-full rounded-lg"/>
         </div>
         <div className="space-y-6">
@@ -35,10 +39,8 @@ function ProductPageSkeleton() {
   )
 }
 
-
-export default function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
+function ProductDisplay({ slug }: { slug: string }) {
   const firestore = useFirestore();
-  const { slug } = use(params);
 
   const productRef = useMemo(() => {
     if (!firestore) return null;
@@ -68,7 +70,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   if (!product) {
     return notFound();
   }
-
+  
   return (
     <div className="container py-8 md:py-12">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
@@ -76,5 +78,15 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         <ProductInfo product={product} variants={variants || []} reviews={reviews || []} />
       </div>
     </div>
-  );
+  )
+}
+
+export default function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
+
+  return (
+    <SelectedVariantProvider>
+      <ProductDisplay slug={slug} />
+    </SelectedVariantProvider>
+  )
 }
