@@ -35,7 +35,7 @@ export function ProductCard({ product, variantImageUrl }: ProductCardProps) {
       <div className="mt-4">
         <h3 className="text-sm font-medium text-foreground/80">{product.category}</h3>
         <p className="mt-1 font-semibold">{product.name}</p>
-        <p className="mt-2 text-lg font-semibold">₹{product.price.toFixed(2)}</p>
+        <p className="mt-2 text-lg font-semibold">Rs{product.price.toFixed(2)}</p>
       </div>
     </Link>
   );

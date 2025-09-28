@@ -79,7 +79,7 @@ export function ProductInfo({ product, variants, reviews }: ProductInfoProps) {
             {product.name}
           </h1>
         </div>
-        <p className="text-3xl font-semibold">₹{product.price.toFixed(2)}</p>
+        <p className="text-3xl font-semibold">Rs{product.price.toFixed(2)}</p>
         <p className="text-muted-foreground leading-relaxed">
           {product.description}
         </p>
@@ -107,7 +107,7 @@ export function ProductInfo({ product, variants, reviews }: ProductInfoProps) {
         <p className="text-sm text-muted-foreground">({reviews.length} reviews)</p>
       </div>
 
-      <p className="text-3xl font-semibold">₹{product.price.toFixed(2)}</p>
+      <p className="text-3xl font-semibold">Rs{product.price.toFixed(2)}</p>
 
       <div>
         <h3 className="text-sm font-medium text-foreground">Color: <span className="text-muted-foreground">{selectedVariant?.color}</span></h3>
