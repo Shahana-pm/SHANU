@@ -85,7 +85,7 @@ function ProductRow({ product }: ProductRowProps) {
       </TableCell>
       <TableCell className="font-medium">{product.name}</TableCell>
       <TableCell>{product.category}</TableCell>
-      <TableCell>${product.price.toFixed(2)}</TableCell>
+      <TableCell>₹{product.price.toFixed(2)}</TableCell>
       <TableCell>
         <div className="flex gap-2">
           {product.isNew && <Badge variant="outline">New</Badge>}

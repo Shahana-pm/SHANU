@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -61,7 +62,7 @@ export default function CartPage() {
                     <div className="flex-1">
                       <h3 className="font-semibold">{item.name}</h3>
                       <p className="text-sm text-muted-foreground">Color: {item.color}</p>
-                      <p className="text-sm font-medium">${item.price.toFixed(2)}</p>
+                      <p className="text-sm font-medium">₹{item.price.toFixed(2)}</p>
                     </div>
                     <div className="flex items-center justify-between sm:justify-start gap-4">
                       <Input
@@ -98,7 +99,7 @@ export default function CartPage() {
             <div className="space-y-2 p-6 bg-secondary rounded-lg">
                 <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>₹{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                     <span>Shipping</span>
@@ -111,7 +112,7 @@ export default function CartPage() {
                 <Separator className="my-4"/>
                 <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>₹{subtotal.toFixed(2)}</span>
                 </div>
             </div>
             <Button size="lg" className="w-full" asChild>
