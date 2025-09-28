@@ -5,36 +5,38 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DollarSign, Package, ShoppingCart, Users, Database } from "lucide-react";
-import { seedDatabase } from "@/lib/seed";
 import { useToast } from "@/hooks/use-toast";
+import { seedDatabaseAction } from "@/lib/seed-actions";
 
 
 export default function AdminDashboardPage() {
   const { toast } = useToast();
 
   const handleSeed = async () => {
-    if (!confirm("Are you sure you want to seed the database? This will overwrite existing product data.")) {
+    if (!confirm("Are you sure you want to seed the database? This will only run if the database is empty.")) {
         return;
     }
 
     try {
-      await seedDatabase();
-      toast({
-        title: "Database Seeded!",
-        description: "Your Firestore database has been populated with product data.",
-      });
+      const result = await seedDatabaseAction();
+      if (result.success) {
+        toast({
+            title: "Database Seeded!",
+            description: result.message,
+        });
+      } else {
+        toast({
+            variant: "destructive",
+            title: "Seeding Skipped or Failed",
+            description: result.message,
+        });
+      }
     } catch (error: any) {
       console.error("Error seeding database:", error);
-      
-      let description = "Could not seed the database. Check the console.";
-      if (error.message.includes("Database is not empty")) {
-        description = "Database already contains data. Seeding was skipped to prevent overwriting your products."
-      }
-
       toast({
         variant: "destructive",
-        title: "Seeding Skipped or Failed",
-        description: description,
+        title: "Seeding Failed",
+        description: "Could not seed the database. Check the console for details.",
       });
     }
   }
@@ -90,7 +92,7 @@ export default function AdminDashboardPage() {
                 <CardTitle>Database Tools</CardTitle>
             </CardHeader>
             <CardContent>
-                <p className="mb-4 text-muted-foreground">Click the button below to populate your Firestore database with the initial set of products. You only need to do this once.</p>
+                <p className="mb-4 text-muted-foreground">Click the button below to populate your Firestore database with the initial set of products. You only need to do this once, and it will only run if the products collection is empty.</p>
                 <Button onClick={handleSeed}>
                     <Database className="mr-2 h-4 w-4" />
                     Seed Database
@@ -101,5 +103,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-    

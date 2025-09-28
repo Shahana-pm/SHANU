@@ -40,7 +40,12 @@ export function useProductsWithFirstVariant(productsQuery: Query | CollectionRef
 
       await Promise.all(productPromises);
       
-      setProductsWithImages(fetchedProducts);
+      // Sort products by original order from snapshot to avoid reordering
+      const orderedProducts = productSnapshot.docs.map(doc => {
+        return fetchedProducts.find(p => p.id === doc.id)!;
+      });
+
+      setProductsWithImages(orderedProducts);
       setLoading(false);
     }, (error) => {
       console.error("Error fetching products with variants:", error);

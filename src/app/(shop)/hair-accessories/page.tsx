@@ -7,12 +7,12 @@ import { useProductsWithFirstVariant } from "@/hooks/use-products-with-first-var
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMemoFirebase } from "@/hooks/use-memo-firebase";
 
-export default function LightingPage() {
+export default function HairAccessoriesPage() {
   const firestore = useFirestore();
   
   const productsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return query(collection(firestore, "products"), where("category", "==", "Lighting"));
+    return query(collection(firestore, "products"), where("category", "==", "Hair Accessories"));
   }, [firestore]);
 
   const { productsWithImages, loading } = useProductsWithFirstVariant(productsQuery);
@@ -20,9 +20,9 @@ export default function LightingPage() {
   return (
     <div className="container py-12">
       <div className="mb-10 text-center">
-        <h1 className="font-headline text-4xl font-bold tracking-tight">Lighting</h1>
+        <h1 className="font-headline text-4xl font-bold tracking-tight">Hair Accessories</h1>
         <p className="mt-2 max-w-2xl mx-auto text-lg text-muted-foreground">
-          Complete your look with our stylish lighting accessories.
+          Complete your look with our stylish hair accessories.
         </p>
       </div>
 

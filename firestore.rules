@@ -57,11 +57,22 @@ service cloud.firestore {
      * @description Controls access to product documents.
      * @path /products/{productId}
      * @allow (get, list) - Anyone can read the products.
-     * @deny (create, update, delete) - No one can create, update, or delete products.
+     * @allow (create, update, delete) - Authenticated users can create, update, or delete products.
      */
     match /products/{productId} {
       allow get, list: if true;
-      allow create, update, delete: if false;
+      allow create, update, delete: if request.auth != null;
+    }
+
+    /**
+     * @description Controls access to product variant documents.
+     * @path /products/{productId}/variants/{variantId}
+     * @allow (get, list) - Anyone can read the variants.
+     * @allow (create, update, delete) - Authenticated users can create, update, or delete variants.
+     */
+    match /products/{productId}/variants/{variantId} {
+      allow get, list: if true;
+      allow create, update, delete: if request.auth != null;
     }
   }
 }

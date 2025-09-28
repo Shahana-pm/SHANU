@@ -1,16 +1,28 @@
 
+'use server';
+/**
+ * @fileOverview A Genkit flow for seeding the Firestore database with initial product data.
+ */
 
-
-// This is a script to seed your Firestore database with initial product data.
-// To run this script, you would typically use a command like `ts-node src/lib/seed.ts`
-// in a real project setup. For this environment, we will trigger it manually.
-
-import { initializeApp, getApps } from 'firebase/app';
+import {ai} from '@/ai/genkit';
+import {z} from 'genkit';
+import admin from 'firebase-admin';
 import { getFirestore, collection, writeBatch, doc, getDocs, query, deleteDoc } from 'firebase/firestore';
-import { firebaseConfig } from '../firebase/config';
 
-// The image URLs are now direct URLs to placeholder images.
-// In a real application, these would be URLs from a CDN or Firebase Storage.
+// This is a placeholder. In a real deployed environment, you would use a secure method
+// like Google Cloud Secret Manager to store and access your service account key.
+// For local development, you would typically have a service-account.json file that is
+// gitignored and loaded here. Since we cannot assume the file exists, we will
+// attempt to use default application credentials, which works in many Google Cloud environments.
+function getServiceAccount() {
+  // In a real project, you would replace this with a secure way to get credentials
+  // For local dev, you can use `gcloud auth application-default login`
+  // and the SDK will pick up the credentials automatically.
+  // We'll return undefined and let initializeApp handle it.
+  return undefined;
+}
+
+
 const originalProducts = [
     {
       id: 'aero-chair',
@@ -213,6 +225,128 @@ const originalProducts = [
       ],
       reviews: [],
     },
+    // Additional Dresses
+    {
+      id: 'summer-breeze-sundress',
+      name: 'Summer Breeze Sundress',
+      category: 'Dresses',
+      price: 75,
+      description: 'Lightweight cotton sundress with a breezy fit, perfect for casual summer outings. Features adjustable straps and a flattering A-line silhouette.',
+      isTrending: true,
+      isNew: true,
+      variants: [
+        { id: 'sundress-floral', color: 'Floral Print', colorHex: '#FFB6C1', imageUrl: '/Product-img/img_dress_2.jpeg' },
+        { id: 'sundress-solid', color: 'Soft Blue', colorHex: '#87CEEB', imageUrl: '/Product-img/img_dress_1.jpeg' },
+      ],
+      reviews: [
+        { id: 'rev9', author: 'Anna K.', rating: 5, title: 'Perfect for summer!', comment: 'So comfortable and cute. Got tons of compliments.', date: '2023-10-01' },
+      ],
+    },
+    {
+      id: 'elegant-evening-gown',
+      name: 'Elegant Evening Gown',
+      category: 'Dresses',
+      price: 250,
+      description: 'Sophisticated silk evening gown with a mermaid silhouette and subtle shimmer. Ideal for formal events and galas.',
+      isTrending: false,
+      isNew: true,
+      variants: [
+        { id: 'gown-black', color: 'Midnight Black', colorHex: '#000000', imageUrl: '/Product-img/img_dress_3.jpeg' },
+        { id: 'gown-red', color: 'Ruby Red', colorHex: '#DC143C', imageUrl: '/Product-img/img_dress_4.jpeg' },
+      ],
+      reviews: [],
+    },
+    // Hair Accessories
+    {
+      id: 'crystal-hair-clip-set',
+      name: 'Crystal Hair Clip Set',
+      category: 'Hair Accessories',
+      price: 35,
+      description: 'Set of 6 elegant crystal hair clips that add sparkle to any hairstyle. Perfect for everyday wear or special occasions.',
+      isTrending: true,
+      isNew: false,
+      variants: [
+        { id: 'clips-silver', color: 'Silver Crystals', colorHex: '#C0C0C0', imageUrl: '/Product-img/2.png' },
+        { id: 'clips-gold', color: 'Gold Crystals', colorHex: '#FFD700', imageUrl: '/Product-img/1.png' },
+      ],
+      reviews: [
+        { id: 'rev10', author: 'Mia S.', rating: 4, title: 'Pretty and sturdy', comment: 'The clips hold hair well and look luxurious.', date: '2023-10-15' },
+      ],
+    },
+    {
+      id: 'silk-headband',
+      name: 'Silk Headband',
+      category: 'Hair Accessories',
+      price: 25,
+      description: 'Soft silk headband in various patterns, comfortable for all-day wear. Adds a chic touch to casual outfits.',
+      isTrending: false,
+      isNew: true,
+      variants: [
+        { id: 'headband-polka', color: 'Polka Dot', colorHex: '#FF69B4', imageUrl: '/Product-img/img_hair_1.jpeg' },
+        { id: 'headband-solid', color: 'Navy Blue', colorHex: '#000080', imageUrl: '/Product-img/img_hair_2.jpeg' },
+      ],
+      reviews: [],
+    },
+    {
+      id: 'floral-bobby-pins',
+      name: 'Floral Bobby Pins',
+      category: 'Hair Accessories',
+      price: 15,
+      description: 'Pack of 10 bobby pins adorned with delicate fabric flowers. Great for boho or romantic hairstyles.',
+      isTrending: true,
+      isNew: false,
+      variants: [
+        { id: 'pins-pink', color: 'Pink Flowers', colorHex: '#FFC0CB', imageUrl: '/Product-img/img_hair_3.jpeg' },
+      ],
+      reviews: [
+        { id: 'rev11', author: 'Lily T.', rating: 5, title: 'Adorable!', comment: 'These make my updos so pretty. Highly recommend.', date: '2023-09-20' },
+      ],
+    },
+    // Kids
+    {
+      id: 'colorful-building-blocks',
+      name: 'Colorful Building Blocks Set',
+      category: 'Kids',
+      price: 45,
+      description: 'Set of 100 colorful wooden building blocks for creative play. Develops fine motor skills and imagination in children ages 3+.',
+      isTrending: true,
+      isNew: true,
+      variants: [
+        { id: 'blocks-standard', color: 'Multi-Color', colorHex: '#FF4500', imageUrl: '/Product-img/img_kids_1.jpeg' },
+      ],
+      reviews: [
+        { id: 'rev12', author: 'Parent J.', rating: 5, title: 'Hours of fun', comment: 'My kids love building towers and houses. Durable quality.', date: '2023-10-05' },
+      ],
+    },
+    {
+      id: 'cozy-kids-hoodie',
+      name: 'Cozy Kids Hoodie',
+      category: 'Kids',
+      price: 30,
+      description: 'Soft fleece hoodie for kids, available in fun colors. Keeps little ones warm and comfortable during cooler weather.',
+      isTrending: false,
+      isNew: false,
+      variants: [
+        { id: 'hoodie-blue', color: 'Bright Blue', colorHex: '#1E90FF', imageUrl: '/Product-img/img_kids_2.jpeg' },
+        { id: 'hoodie-green', color: 'Lime Green', colorHex: '#32CD32', imageUrl: '/Product-img/img_kids_3.jpeg' },
+      ],
+      reviews: [],
+    },
+    {
+      id: 'fun-animal-plush-toy',
+      name: 'Fun Animal Plush Toy',
+      category: 'Kids',
+      price: 20,
+      description: 'Adorable 12-inch plush toy of a friendly bear. Machine washable and perfect for cuddling or imaginative play.',
+      isTrending: true,
+      isNew: true,
+      variants: [
+        { id: 'plush-bear', color: 'Brown Bear', colorHex: '#8B4513', imageUrl: '/Product-img/img_kids_4.jpeg' },
+      ],
+      reviews: [
+        { id: 'rev13', author: 'Mom R.', rating: 5, title: 'Super soft', comment: 'My toddler carries it everywhere. Great gift idea.', date: '2023-10-10' },
+      ],
+    },
   ];
 
   async function deleteCollection(db: any, collectionPath: string) {
@@ -227,51 +361,69 @@ const originalProducts = [
     await batch.commit();
 }
 
-
-export async function seedDatabase() {
-    // Initialize Firebase
-    const apps = getApps();
-    const app = apps.length > 0 ? apps[0] : initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    console.log("Firebase Initialized and Firestore instance created.");
-
-    // Delete existing products before seeding
-    console.log("Deleting existing products...");
-    const productsSnapshot = await getDocs(collection(db, 'products'));
-    for (const productDoc of productsSnapshot.docs) {
-        // We need to delete subcollections first
-        await deleteCollection(db, `products/${productDoc.id}/variants`);
-        await deleteCollection(db, `products/${productDoc.id}/reviews`);
-        await deleteDoc(doc(db, 'products', productDoc.id));
-    }
-    console.log("Existing products deleted.");
-
-
-    const batch = writeBatch(db);
-
-    originalProducts.forEach(product => {
-        const { id, variants, reviews, ...productData } = product;
-        const productRef = doc(db, "products", id);
-        batch.set(productRef, productData);
-
-        variants.forEach(variant => {
-            const { id: variantId, ...variantData } = variant;
-            const variantRef = doc(db, `products/${id}/variants/${variantId}`);
-            batch.set(variantRef, variantData);
-        });
-
-        reviews.forEach(review => {
-            const { id: reviewId, ...reviewData } = review;
-            const reviewRef = doc(db, `products/${id}/reviews/${reviewId}`);
-            batch.set(reviewRef, reviewData);
-        });
-    });
-
+export const seedDatabaseFlow = ai.defineFlow(
+  {
+    name: 'seedDatabaseFlow',
+    inputSchema: z.void(),
+    outputSchema: z.object({
+      success: z.boolean(),
+      message: z.string(),
+      error: z.string().optional(),
+    }),
+  },
+  async () => {
     try {
-        await batch.commit();
-        console.log(`Successfully seeded ${originalProducts.length} products.`);
-    } catch (error) {
-        console.error("Error seeding database:", error);
-        throw new Error("Error seeding database");
+      if (!admin.apps.length) {
+        const serviceAccount = getServiceAccount();
+        admin.initializeApp({
+          credential: serviceAccount ? admin.credential.cert(serviceAccount as admin.ServiceAccount) : undefined,
+        });
+      }
+      const db = getFirestore(admin.app());
+
+      const productsCollectionRef = collection(db, 'products');
+      const productsSnapshot = await getDocs(productsCollectionRef);
+
+      if (!productsSnapshot.empty) {
+        return {
+          success: false,
+          message: "Database already contains data. Seeding was skipped to prevent overwriting your products.",
+        };
+      }
+      
+      const batch = writeBatch(db);
+
+      originalProducts.forEach(product => {
+          const { id, variants, reviews, ...productData } = product;
+          const productRef = doc(db, "products", id);
+          batch.set(productRef, productData);
+
+          variants.forEach(variant => {
+              const { id: variantId, ...variantData } = variant;
+              const variantRef = doc(db, `products/${id}/variants/${variantId}`);
+              batch.set(variantRef, variantData);
+          });
+
+          reviews.forEach(review => {
+              const { id: reviewId, ...reviewData } = review;
+              const reviewRef = doc(db, `products/${id}/reviews/${reviewId}`);
+              batch.set(reviewRef, reviewData);
+          });
+      });
+
+      await batch.commit();
+      return {
+          success: true,
+          message: `Successfully seeded ${originalProducts.length} products.`
+      };
+
+    } catch (e: any) {
+      console.error("Error seeding database:", e);
+      return {
+        success: false,
+        message: "Error seeding database.",
+        error: e.message,
+      };
     }
-}
+  }
+);
